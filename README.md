@@ -10,7 +10,7 @@ main.ipynb includes 3 experiments so far:
 - Reservoir RNN with evolution optimization: the output is trained for x amount of epochs, after that the EA is used to optimize either accuracy or loss
 
 
-# Still working on:
+### Still working on:
 
 Finding a well performing EA (still looking into the literature)
 - What mutation to use
