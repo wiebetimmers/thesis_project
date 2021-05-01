@@ -7,7 +7,7 @@ run main.ipynb to import the datasets, neural networks, ea and performing operat
 main.ipynb includes 3 experiments so far:
 - Baseline RNN, with full backpropagation
 - Reservoir RNN, only output is trained, no evolutionairy optimization is used
-- Reservoir RNN with evolution optimization: the output is trained for x amount of epochs, after that the EA is used to optimize either accuracy or loss
+- Reservoir RNN with evolution optimization: the output is trained for x amount of epochs, after that the EA is used to optimize either accuracy or loss  -> we only plot the best performing model in the population afterwards. 
 
 
 ### Still working on:
