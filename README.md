@@ -1,5 +1,8 @@
 # thesis_project
 
+Update 2-5:
+Added a plot to visualize the final population. 
+
 Update 1-5: 
 
 run main.ipynb to import the datasets, neural networks, ea and performing operations (like training and evaluation). 
