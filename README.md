@@ -1,5 +1,9 @@
 # thesis_project
 
+Update 3-5:
+Fixed some errors regarding the mutation functions.
+Changed from accuracy to classification error, objective function is now to minimize the classification error. 
+
 Update 2-5:
 Added a plot to visualize the final population. 
 
