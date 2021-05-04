@@ -1,7 +1,8 @@
 # thesis_project
 
 Update 4-5:
-- Changed all notebooks to .py files, processing time improved a lot. Added a Parameters.py file. 
+- Changed all notebooks to .py files, processing time improved a lot. Added a Parameters.py file.
+- Would really like to run it on the compute.vu.nl service, but my student disk space is full (max 1000 mb for students at the VU) 
 
 main.py includes 3 experiments so far:
 - Baseline RNN, with full backpropagation
