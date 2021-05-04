@@ -1,13 +1,7 @@
 # thesis_project
 
-Update 3-5:
-Fixed some errors regarding the mutation functions.
-Changed from accuracy to classification error, objective function is now to minimize the classification error. 
-
-Update 2-5:
-Added a plot to visualize the final population. 
-
-Update 1-5: 
+Update 4-5:
+- Changed all notebooks to .py files, processing time improved a lot. Added a Parameters.py file. 
 
 run main.ipynb to import the datasets, neural networks, ea and performing operations (like training and evaluation). 
 
