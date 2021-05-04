@@ -1,16 +1,13 @@
+import datetime  # Keep track of execution time.
+begin_time = datetime.datetime.now()
+
 import torch.optim as optim
 from pytorch_model_summary import summary
-
 import Networks as Net
 import Operations as Ops
 import Datasets as Data
 import Parameters as P
 from EA import EA
-
-# Run baseline model
-bl_model_digits = Net.Baseline_RNN(P.input_size_digits, P.n_hidden, P.n_labels, P.T, dataset = 'Digits')
-optimizer_digits = optim.SGD([p for p in bl_model_digits.parameters() if p.requires_grad == True], lr=P.lr_SGD, momentum=P.momentum_SGD)
-trained_bl_digits = Ops.training(bl_model_digits, P.train_loader_digits, P.val_loader_digits, P.n_epochs, optimizer_digits, P.loss_function, P.max_loss_iter)
 
 # Run reservoir ea
 
@@ -40,6 +37,10 @@ if P.select_opt == 'classification_error':
 elif P.select_opt == 'loss':
     best_pop_digits = sorted(new_pop, key=lambda k: k['loss_results'][-1], reverse=False)
 
+# Run baseline model
+bl_model_digits = Net.Baseline_RNN(P.input_size_digits, P.n_hidden, P.n_labels, P.T, dataset = 'Digits')
+optimizer_digits = optim.SGD([p for p in bl_model_digits.parameters() if p.requires_grad == True], lr=P.lr_SGD, momentum=P.momentum_SGD)
+trained_bl_digits = Ops.training(bl_model_digits, P.train_loader_digits, P.val_loader_digits, P.n_epochs, optimizer_digits, P.loss_function, P.max_loss_iter)
 
 # Run RNN without evo
 res_model_digits = Net.Reservoir_RNN(P.input_size_digits, P.reservoir_size, P.n_labels, P.T, dataset = 'Digits')
@@ -66,3 +67,9 @@ Ops.combined_plot_result(
 Ops.best_pop_plot(best_pop_digits,
               best_pop_digits[0],
               title='Final (best) population (size %s), individual performance' %(P.population_size))
+
+
+# Print execution time:
+exc_time = datetime.datetime.now() - begin_time
+
+print('Execution time was: (hours:minute:seconds:microseconds) %s ' %exc_time)
