@@ -1,7 +1,9 @@
 # thesis_project
 
 Update 4-5:
+- 2 main files, for easier processing the digits or mnist experiments
 - Changed all notebooks to .py files, processing time improved a lot. Added a Parameters.py file.
+- Now also possible to do mutation and crossover on the bias weights
 
 
 main.py includes 3 experiments so far:
