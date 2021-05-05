@@ -14,13 +14,10 @@ main.py includes 3 experiments so far:
 
 ### Still working on:
 
-Finding a well performing EA (still looking into the literature)
-- What mutation to use
-- What recombination to use
-- What selection mechanism to use
-- How to asses fitness. (minizing classification error )
-
 Proper saving of the models
+Additional mutation, crossover, selection methods
+A situation in which we keep the output layer constant after a few training cycles, then only perform EA optimization on the non-output layers. 
+
 
 
 
