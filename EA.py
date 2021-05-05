@@ -49,35 +49,27 @@ class EA(object):
 
         return population
 
-    def mutation(self, pop, option, mutate_bias, offspring_ratio, sample_dist, perturb_rate):
+    def mutation(self, pop, option, mutate_bias, sample_dist, perturb_rate):
 
         if option == 'random_perturbation':
             mut_pop = self.random_perturbation(pop, sample_dist, mutate_bias)
-            print('Parent / child ratio = 1 : %s' % offspring_ratio)
-
-            # Optional: offspring ratio to increase offspring size.
-            '''if offspring_ratio > 1:
-                for i in range(offspring_ratio - 1):
-                    mut_pop += self.random_perturbation(pop, sample_dist)'''
-
         elif option == 'diff_mutation':
             mut_pop = self.diff_mutation(pop, perturb_rate, mutate_bias)
 
-            # Optional: offspring ratio to increase offspring size.
-            '''if offspring_ratio > 1:
-                for i in range(offspring_ratio - 1):
-                    mut_pop += self.diff_mutation(pop, perturb_rate)'''
-
         return mut_pop
+
+    def sample_two(self, pop):
+        sample = random.sample(pop, 2)
+        sample1 = sample[0]['model']
+        sample2 = sample[1]['model']
+        return sample1, sample2
 
     def diff_mutation(self, pop, perturb_rate, mutate_bias):
         mut_pop = copy.deepcopy(pop)
 
         for reservoir in mut_pop:
             # Randomly sample 2 models from the population & split them up
-            sample = random.sample(pop, 2)
-            sample1 = sample[0]['model']
-            sample2 = sample[1]['model']
+            sample1, sample2 = self.sample_two(pop)
 
             # Perturb the weights
             reservoir['model'].layer1.weight += perturb_rate * (sample1.layer1.weight - sample2.layer1.weight)
@@ -234,9 +226,16 @@ class EA(object):
              sample_dist, k_best, loss_function):
 
         # Apply some mutation and recombination
-        mut_pop = self.mutation(pop, mutate_opt, mutate_bias, offspring_ratio, sample_dist, perturb_rate)
+        mut_pop = self.mutation(pop, mutate_opt, mutate_bias, sample_dist, perturb_rate)
         crossed_pop = self.crossover(pop,mutate_bias)
         mut_crossed_pop = self.crossover(mut_pop,mutate_bias)
+
+        # Optional: offspring ratio to increase offspring size.
+        if offspring_ratio > 1:
+            for i in range(offspring_ratio - 1):
+                mut_pop += self.mutation(pop, mutate_opt, mutate_bias, sample_dist, perturb_rate)
+                crossed_pop += self.crossover(pop, mutate_bias)
+                mut_crossed_pop += self.crossover(mut_pop, mutate_bias)
 
         # Merge (mutated pop) + ( crossed pop) + (mutated & crossed), so we have a large offspring pool to pick from.
         merged_pop = mut_pop + crossed_pop + mut_crossed_pop
