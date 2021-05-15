@@ -49,10 +49,10 @@ class EA(object):
 
         return population
 
-    def mutation(self, pop, option, mutate_bias, sample_dist, perturb_rate):
+    def mutation(self, pop, option, mutate_bias, sample_dist, perturb_rate, mu, sigma):
 
         if option == 'random_perturbation':
-            mut_pop = self.random_perturbation(pop, sample_dist, mutate_bias)
+            mut_pop = self.random_perturbation(pop, sample_dist, mutate_bias, mu, sigma)
         elif option == 'diff_mutation':
             mut_pop = self.diff_mutation(pop, perturb_rate, mutate_bias)
 
@@ -90,44 +90,71 @@ class EA(object):
 
         return mut_pop
 
-    def random_perturbation(self, pop, sample_dist, mutate_bias):
+    def random_perturbation(self, pop, sample_dist, mutate_bias, mu, sigma):
         mut_pop = copy.deepcopy(pop)
 
         for reservoir in mut_pop:
+
+            # sample values
             if sample_dist == 'uniform':
-                W_in_sample = torch.empty(self.reservoir_size, self.input_size).uniform_(-0.01, 0.01)
-                W_r_sample = torch.empty(self.reservoir_size, self.reservoir_size).uniform_(-0.01, 0.01)
-                W_out_sample = torch.empty(self.output_size, self.reservoir_size).uniform_(-0.01, 0.01)
-                U_sample = torch.empty(self.reservoir_size, self.input_size).uniform_(-0.01, 0.01)
+                W_in_sample = torch.empty(self.reservoir_size, self.input_size).uniform_(-3, 3)
+                W_r_sample = torch.empty(self.reservoir_size, self.reservoir_size).uniform_(-3, 3)
+                W_out_sample = torch.empty(self.output_size, self.reservoir_size).uniform_(-3, 3)
+                U_sample = torch.empty(self.reservoir_size, self.input_size).uniform_(-3, 3)
 
                 if mutate_bias:
-                    W_in_bias = torch.empty(1, self.reservoir_size).uniform_(-0.01, 0.01)
-                    W_r_bias = torch.empty(1, self.reservoir_size).uniform_(-0.01, 0.01)
-                    W_out_bias = torch.empty(1, self.output_size).uniform_(-0.01, 0.01)
-                    U_bias = torch.empty(1, self.reservoir_size).uniform_(-0.01, 0.01)
+                    W_in_bias = torch.empty(1, self.reservoir_size).uniform_(-3, 3)
+                    W_r_bias = torch.empty(1, self.reservoir_size).uniform_(-3, 3)
+                    W_out_bias = torch.empty(1, self.output_size).uniform_(-3, 3)
+                    U_bias = torch.empty(1, self.reservoir_size).uniform_(-3, 3)
 
             elif sample_dist == 'gaussian':
-                W_in_sample = torch.empty(self.reservoir_size, self.input_size).normal_(0, 0.05)
-                W_r_sample = torch.empty(self.reservoir_size, self.reservoir_size).normal_(0, 0.05)
-                W_out_sample = torch.empty(self.output_size, self.reservoir_size).normal_(0, 0.05)
-                U_sample = torch.empty(self.reservoir_size, self.input_size).normal_(0, 0.05)
+                W_in_sample = torch.empty(self.reservoir_size, self.input_size).normal_(mu, sigma)
+                W_r_sample = torch.empty(self.reservoir_size, self.reservoir_size).normal_(mu, sigma)
+                W_out_sample = torch.empty(self.output_size, self.reservoir_size).normal_(mu, sigma)
+                U_sample = torch.empty(self.reservoir_size, self.input_size).normal_(mu, sigma)
 
                 if mutate_bias:
-                    W_in_bias = torch.empty(1, self.reservoir_size).normal_(0, 0.05)
-                    W_r_bias = torch.empty(1, self.reservoir_size).normal_(0, 0.05)
-                    W_out_bias = torch.empty(1, self.output_size).normal_(0, 0.05)
-                    U_bias = torch.empty(1, self.reservoir_size).normal_(0, 0.05)
+                    W_in_bias = torch.empty(1, self.reservoir_size).normal_(mu, sigma)
+                    W_r_bias = torch.empty(1, self.reservoir_size).normal_(mu, sigma)
+                    W_out_bias = torch.empty(1, self.output_size).normal_(mu, sigma)
+                    U_bias = torch.empty(1, self.reservoir_size).normal_(mu, sigma)
 
-            reservoir['model'].layer1.weight = nn.Parameter(W_in_sample, requires_grad=False)
-            reservoir['model'].layer2.weight = nn.Parameter(W_r_sample, requires_grad=False)
-            reservoir['model'].layer3.weight = nn.Parameter(U_sample, requires_grad=False)
-            reservoir['model'].layer4.weight = nn.Parameter(W_out_sample, requires_grad=False)
+            elif sample_dist == 'cauchy':
+                W_in_sample = torch.empty(self.reservoir_size, self.input_size).cauchy_(mu, sigma)
+                W_r_sample = torch.empty(self.reservoir_size, self.reservoir_size).cauchy_(mu, sigma)
+                W_out_sample = torch.empty(self.output_size, self.reservoir_size).cauchy_(mu, sigma)
+                U_sample = torch.empty(self.reservoir_size, self.input_size).cauchy_(mu, sigma)
+
+                if mutate_bias:
+                    W_in_bias = torch.empty(1, self.reservoir_size).cauchy_(mu, sigma)
+                    W_r_bias = torch.empty(1, self.reservoir_size).cauchy_(mu, sigma)
+                    W_out_bias = torch.empty(1, self.output_size).cauchy_(mu, sigma)
+                    U_bias = torch.empty(1, self.reservoir_size).cauchy_(mu, sigma)
+
+            elif sample_dist == 'lognormal':
+                W_in_sample = torch.empty(self.reservoir_size, self.input_size).log_normal_(mu, sigma)
+                W_r_sample = torch.empty(self.reservoir_size, self.reservoir_size).log_normal_(mu, sigma)
+                W_out_sample = torch.empty(self.output_size, self.reservoir_size).log_normal_(mu, sigma)
+                U_sample = torch.empty(self.reservoir_size, self.input_size).log_normal_(mu, sigma)
+
+                if mutate_bias:
+                    W_in_bias = torch.empty(1, self.reservoir_size).log_normal_(mu, sigma)
+                    W_r_bias = torch.empty(1, self.reservoir_size).log_normal_(mu, sigma)
+                    W_out_bias = torch.empty(1, self.output_size).log_normal_(mu, sigma)
+                    U_bias = torch.empty(1, self.reservoir_size).log_normal_(mu, sigma)
+
+            # Add sampled value to the current weights
+            reservoir['model'].layer1.weight = nn.Parameter(W_in_sample+reservoir['model'].layer1.weight, requires_grad=False)
+            reservoir['model'].layer2.weight = nn.Parameter(W_r_sample+reservoir['model'].layer2.weight, requires_grad=False)
+            reservoir['model'].layer3.weight = nn.Parameter(U_sample+reservoir['model'].layer3.weight, requires_grad=False)
+            reservoir['model'].layer4.weight = nn.Parameter(W_out_sample+reservoir['model'].layer4.weight, requires_grad=False)
 
             if mutate_bias:
-                reservoir['model'].layer1.bias = nn.Parameter(W_in_bias, requires_grad=False)
-                reservoir['model'].layer2.bias = nn.Parameter(W_r_bias, requires_grad=False)
-                reservoir['model'].layer3.bias = nn.Parameter(U_bias, requires_grad=False)
-                reservoir['model'].layer4.bias = nn.Parameter(W_out_bias, requires_grad=False)
+                reservoir['model'].layer1.bias = nn.Parameter(W_in_bias+reservoir['model'].layer1.bias, requires_grad=False)
+                reservoir['model'].layer2.bias = nn.Parameter(W_r_bias+reservoir['model'].layer2.bias, requires_grad=False)
+                reservoir['model'].layer3.bias = nn.Parameter(U_bias+reservoir['model'].layer3.bias, requires_grad=False)
+                reservoir['model'].layer4.bias = nn.Parameter(W_out_bias+reservoir['model'].layer4.bias, requires_grad=False)
 
         return mut_pop
 
@@ -223,10 +250,10 @@ class EA(object):
         return new_pop
 
     def step(self, pop, mutate_opt, mutate_bias, perturb_rate, select_opt, select_mech, offspring_ratio,
-             sample_dist, k_best, loss_function):
+             sample_dist, k_best, loss_function, mu, sigma):
 
         # Apply some mutation and recombination
-        mut_pop = self.mutation(pop, mutate_opt, mutate_bias, sample_dist, perturb_rate)
+        mut_pop = self.mutation(pop, mutate_opt, mutate_bias, sample_dist, perturb_rate, mu, sigma)
         crossed_pop = self.crossover(pop,mutate_bias)
         mut_crossed_pop = self.crossover(mut_pop,mutate_bias)
 

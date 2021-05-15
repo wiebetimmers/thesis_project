@@ -1,6 +1,7 @@
 import datetime  # Keep track of execution time.
 begin_time = datetime.datetime.now()
 
+import sys
 import torch
 import torch.optim as optim
 from pytorch_model_summary import summary
@@ -70,18 +71,44 @@ Ops.best_pop_plot(best_pop_mnist,
               best_pop_mnist[0],
               title='Final (best) population (size %s) MNIST, individual performance' %(P.population_size))
 
-test_result_digits = Ops.evaluation(test_loader_mnist, trained_res_mnist['model'], 'Final score MNIST on test set - only output train', P.loss_function)
-test_result_digits2 = Ops.evaluation(test_loader_mnist, trained_bl_mnist['model'], 'Final score MNIST on test set- baseline', P.loss_function)
-test_result_digits3 = Ops.evaluation(test_loader_mnist, best_pop_mnist[0]['model'], 'Final score MNIST on test set- with evolution', P.loss_function)
 
+sys.stdout = open("test_results_mnist.txt", "w")
+# Network / Learning parameters
+print('Network parameters:\n'
+      'reservoir size: %s, \n'
+      'n_hidden: %s, \n'
+      'learning rate: %s, \n'
+      'momentum sgd: %s, \n'
+      'backprop epochs: %s, \n'
+      'T: %s, \n'
+      'loss_function: %s \n' % (P.reservoir_size, P.n_hidden, P.lr_SGD, P.momentum_SGD,
+                             P.backprop_epochs, P.T, P.loss_function))
+print('EA parameters: \n'
+      ' pop size: %s,\n'
+      'generations: %s,\n'
+      'mutate opt: %s,\n'
+      'perturb rate: %s,\n'
+      'mutate_bias: %s\n'
+      'sample_dist: %s\n'
+      'select opt: %s\n'
+      'select mech: %s\n'
+      'k_best: %s\n'
+      'offspring ratio: %s\n'
+      'n epochs: %s\n' % (P.population_size,P.generations , P.mutate_opt, P.perturb_rate,
+P.mutate_bias, P.sample_dist,      P.select_opt,  P.select_mech,  P.k_best,  P.offspring_ratio, P.n_epochs))
 
+test_result_mnist = Ops.evaluation(test_loader_mnist, trained_res_mnist['model'], 'Final score MNIST on test set - only output train', P.loss_function)
+test_result_mnist2 = Ops.evaluation(test_loader_mnist, trained_bl_mnist['model'], 'Final score MNIST on test set- baseline', P.loss_function)
+test_result_mnist3 = Ops.evaluation(test_loader_mnist, best_pop_mnist[0]['model'], 'Final score MNIST on test set- with evolution', P.loss_function)
 
 # Baseline RNN model
-# print(summary(bl_model_mnist, torch.zeros(1, 64), show_input=True, show_hierarchical=False))
+print(summary(bl_model_mnist, torch.zeros(1, 64), show_input=True, show_hierarchical=False))
 # Reservoir RNN model
-# print(summary(res_model_mnist, torch.zeros(1, 64), show_input=True, show_hierarchical=False))
+print(summary(res_model_mnist, torch.zeros(1, 64), show_input=True, show_hierarchical=False))
 
 # Print execution time:
 exc_time = datetime.datetime.now() - begin_time
+
+sys.stdout.close()
 
 print('Execution time was: (hours:minute:seconds:microseconds) %s ' %exc_time)

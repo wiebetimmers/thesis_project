@@ -22,16 +22,18 @@ max_loss_iter = 10  # not  used yet
 
 
 # EA parameters
-population_size = 20
-generations = 45       # epochs without backprop
+population_size = 25
+generations = 195     # epochs without backprop
 mutate_opt = 'diff_mutation'  # Options: 'random_perturbation' , 'diff_mutation'
 perturb_rate = 0.5  # If using diff mutation, use between 0-2
-mutate_bias = False  # If we want to mutate the bias or not.
-sample_dist = 'uniform'       # If using random perturbation, options: 'gaussian' , 'uniform'
-select_opt = 'classification_error'  # 'classification_error' or 'loss'
+mutate_bias = False  # If we want to mutate/crossover the bias or not.
+sample_dist = 'gaussian'       # If using random perturbation, options: 'gaussian' , 'uniform', 'cauchy', 'lognormal'
+mu = 0  # If we require a mu
+sigma = 1  # If we require a variance
+select_opt = 'loss'  # 'classification_error' or 'loss'
 select_mech = 'keep_k_best'   # Options: 'keep_k_best'= k best of the parents , 'merge_all'
-k_best = population_size // 5   # Keep 1/k of the population as the best for new pop, the rest is new.
-offspring_ratio = 0    # Optional
+k_best = population_size // 4   # Keep 1/k of the population as the best for new pop, the rest is new.
+offspring_ratio = 1    # Optional, increase the offspring by factor k (k times as much offspring)
 
 
 # Run all models for same amount of time, but make a distinction in epochs for the evolutionairy approach .

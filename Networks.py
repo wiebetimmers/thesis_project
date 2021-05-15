@@ -1,4 +1,5 @@
 import torch
+import math
 import torch.nn as nn
 
 
@@ -17,10 +18,15 @@ class Baseline_RNN(nn.Module):
 
         self.T = T
 
-        # Initialize the weights
-        self.input_hidden_layer.weight.data.uniform_(-0.01, 0.01)
-        self.recurrent_layer.weight.data.uniform_(-0.01, 0.01)
-        self.output_layer.weight.data.uniform_(-0.01, 0.01)
+        # Initialize the weights - hardcoded regular initialize function pytorch
+        stdv = 1. / math.sqrt(self.input_hidden_layer.weight.size(1))
+        self.input_hidden_layer.weight.data.uniform_(-stdv, stdv)
+
+        stdv = 1. / math.sqrt(self.recurrent_layer.weight.size(1))
+        self.recurrent_layer.weight.data.uniform_(-stdv, stdv)
+
+        stdv = 1. / math.sqrt(self.output_layer.weight.size(1))
+        self.output_layer.weight.data.uniform_(-stdv, stdv)
 
         self.dataset = dataset
 
@@ -94,16 +100,20 @@ class Reservoir_RNN(nn.Module):
 
         # Sample the initial weights from a uniform distribution - initialize the same as in the baseline model.
         self.W_in = nn.Parameter(data=torch.zeros(reservoir_size, input_size, requires_grad=False))
-        self.W_in.data.uniform_(-0.01, 0.01)
+        stdv = 1. / math.sqrt(self.W_in.size(1))
+        self.W_in.data.uniform_(-stdv, stdv)
 
         self.W_r = nn.Parameter(data=torch.zeros(reservoir_size, reservoir_size), requires_grad=False)
-        self.W_r.data.uniform_(-0.01, 0.01)
+        stdv = 1. / math.sqrt(self.W_r.size(1))
+        self.W_r.data.uniform_(-stdv, stdv)
 
         self.W_out = nn.Parameter(data=torch.zeros(output_size, reservoir_size), requires_grad=True)
-        self.W_out.data.uniform_(-0.01, 0.01)
+        stdv = 1. / math.sqrt(self.W_out.size(1))
+        self.W_out.data.uniform_(-stdv, stdv)
 
         self.U = nn.Parameter(data=torch.zeros(reservoir_size, input_size), requires_grad=False)
-        self.U.data.uniform_(-0.01, 0.01)
+        stdv = 1. / math.sqrt(self.U.size(1))
+        self.U.data.uniform_(-stdv, stdv)
         return
 
     def initLayers(self, input_size, reservoir_size, output_size):

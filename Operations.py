@@ -51,11 +51,8 @@ def combined_plot_result(epochs, loss_bl, class_error_bl,
     ax1.legend(loc='upper right')
     ax2.legend(loc='upper right')
 
-    plt.savefig('%s.png' % (title), bbox_inches='tight')
-    plt.show()
-
+    plt.savefig('plots/%s.png' % (title), bbox_inches='tight')
     return
-
 
 def best_pop_plot(best_pop, best_individual, title):
     fig, (ax1, ax2) = plt.subplots(1, 2)
@@ -72,7 +69,7 @@ def best_pop_plot(best_pop, best_individual, title):
 
     ax1.legend(loc='upper right')
     ax2.legend(loc='upper right')
-    plt.savefig('%s.png' % (title), bbox_inches='tight')
+    plt.savefig('plots/%s.png' % (title), bbox_inches='tight')
 
     return
 
