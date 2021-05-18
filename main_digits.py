@@ -1,10 +1,7 @@
 import datetime  # Keep track of execution time.
-import sys
 begin_time = datetime.datetime.now()
 
-import torch
 import torch.optim as optim
-from pytorch_model_summary import summary
 import Networks as Net
 import Operations as Ops
 import Datasets as Data
@@ -35,8 +32,7 @@ new_pop = reservoir_set_digits
 
 # Perform ea steps
 for i in range(P.generations):
-    new_pop = ea.step(new_pop, P.mutate_opt, P.mutate_bias, P.perturb_rate, P.select_opt, P.select_mech, P.offspring_ratio,
-                      P.sample_dist, P.k_best, P.loss_function, P.mu, P.sigma)
+    new_pop = ea.step(new_pop, i+P.backprop_epochs)
 
 # Sort population after x amount of generations, based on classification error or loss performance
 if P.select_opt == 'classification_error':
@@ -45,7 +41,7 @@ elif P.select_opt == 'loss':
     best_pop_digits = sorted(new_pop, key=lambda k: k['loss_results'][-1], reverse=False)
 
 # Save model and results dict
-ea_reservoir_model = open('models/EA_reservoir_model.pkl', 'wb')
+ea_reservoir_model = open('models/digits_EA_reservoir_model.pkl', 'wb')
 pickle.dump(best_pop_digits, ea_reservoir_model)
 ea_reservoir_model.close()
 
@@ -56,7 +52,7 @@ optimizer_digits = optim.SGD([p for p in bl_model_digits.parameters() if p.requi
 trained_bl_digits = Ops.training(bl_model_digits, train_loader_digits, val_loader_digits, P.n_epochs, optimizer_digits, P.loss_function, P.max_loss_iter)
 
 # Save model and results dict
-baseline_model = open('models/baseline_model.pkl', 'wb')
+baseline_model = open('models/digits_baseline_model.pkl', 'wb')
 pickle.dump(trained_bl_digits, baseline_model)
 baseline_model.close()
 
@@ -70,7 +66,7 @@ trained_res_digits = Ops.training(res_model_digits, train_loader_digits, val_loa
                                   optimizer_digits, P.loss_function, P.max_loss_iter)
 
 # Save model and results dict
-reservoir_model_no_evo = open('models/reservoir_model_no_evo.pkl', 'wb')
+reservoir_model_no_evo = open('models/digits_reservoir_model_no_evo.pkl', 'wb')
 pickle.dump(trained_res_digits, reservoir_model_no_evo)
 reservoir_model_no_evo.close()
 

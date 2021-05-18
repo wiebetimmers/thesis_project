@@ -4,7 +4,7 @@ import random
 import copy
 import torch.nn as nn
 import Operations as Ops
-
+import Parameters as P
 
 
 class EA(object):
@@ -16,10 +16,10 @@ class EA(object):
         self.reservoir_size = reservoir_size
         self.output_size = n_labels
 
-    def fitness(self, population, loss_function, parents=None):
+    def fitness(self, population, parents=None):
 
         # Copy paste the last results, so we don't have to calculate the loss and accuracy of an unchanged model.
-        if parents == True:
+        if parents:
             for reservoir in population:
                 reservoir['epoch'].append(reservoir['epoch'][-1] + 1)
                 reservoir['loss_results'].append(reservoir['loss_results'][-1])
@@ -32,7 +32,7 @@ class EA(object):
                 epoch, loss, total_accuracy = Ops.evaluation(self.val_loader,
                                                          reservoir['model'],
                                                          reservoir['epoch'][-1] + 1,
-                                                         loss_function)
+                                                         P.loss_function)
                 reservoir['epoch'].append(epoch)
                 reservoir['loss_results'].append(loss)
                 reservoir['class_error_results'].append(total_accuracy)
@@ -49,12 +49,12 @@ class EA(object):
 
         return population
 
-    def mutation(self, pop, option, mutate_bias, sample_dist, perturb_rate, mu, sigma):
+    def mutation(self, pop, perturb_rate):
 
-        if option == 'random_perturbation':
-            mut_pop = self.random_perturbation(pop, sample_dist, mutate_bias, mu, sigma)
-        elif option == 'diff_mutation':
-            mut_pop = self.diff_mutation(pop, perturb_rate, mutate_bias)
+        if P.mutate_opt == 'random_perturbation':
+            mut_pop = self.random_perturbation(pop, P.sample_dist, P.mutate_bias, P.mu, P.sigma, perturb_rate)
+        elif P.mutate_opt == 'diff_mutation':
+            mut_pop = self.diff_mutation(pop, perturb_rate)
 
         return mut_pop
 
@@ -64,7 +64,7 @@ class EA(object):
         sample2 = sample[1]['model']
         return sample1, sample2
 
-    def diff_mutation(self, pop, perturb_rate, mutate_bias):
+    def diff_mutation(self, pop, perturb_rate):
         mut_pop = copy.deepcopy(pop)
 
         for reservoir in mut_pop:
@@ -79,7 +79,7 @@ class EA(object):
                         sample1.layer4.weight - sample2.layer4.weight)
             reservoir['model'].layer4.weight = nn.Parameter(temp_w_out, requires_grad=False)
 
-            if mutate_bias:
+            if P.mutate_bias:
                 # Perturb the bias
                 reservoir['model'].layer1.bias += perturb_rate * (sample1.layer1.bias - sample2.layer1.bias)
                 reservoir['model'].layer2.bias += perturb_rate * (sample1.layer2.bias - sample2.layer2.bias)
@@ -90,23 +90,23 @@ class EA(object):
 
         return mut_pop
 
-    def random_perturbation(self, pop, sample_dist, mutate_bias, mu, sigma):
+    def random_perturbation(self, pop, sample_dist, mutate_bias, mu, sigma, perturb_rate):
         mut_pop = copy.deepcopy(pop)
 
         for reservoir in mut_pop:
 
             # sample values
             if sample_dist == 'uniform':
-                W_in_sample = torch.empty(self.reservoir_size, self.input_size).uniform_(-3, 3)
-                W_r_sample = torch.empty(self.reservoir_size, self.reservoir_size).uniform_(-3, 3)
-                W_out_sample = torch.empty(self.output_size, self.reservoir_size).uniform_(-3, 3)
-                U_sample = torch.empty(self.reservoir_size, self.input_size).uniform_(-3, 3)
+                W_in_sample = torch.empty(self.reservoir_size, self.input_size).uniform_(-3*P.sigma, 3*P.sigma)
+                W_r_sample = torch.empty(self.reservoir_size, self.reservoir_size).uniform_(-3*P.sigma, 3*P.sigma)
+                W_out_sample = torch.empty(self.output_size, self.reservoir_size).uniform_(-3*P.sigma, 3*P.sigma)
+                U_sample = torch.empty(self.reservoir_size, self.input_size).uniform_(-3*P.sigma, 3*P.sigma)
 
                 if mutate_bias:
-                    W_in_bias = torch.empty(1, self.reservoir_size).uniform_(-3, 3)
-                    W_r_bias = torch.empty(1, self.reservoir_size).uniform_(-3, 3)
-                    W_out_bias = torch.empty(1, self.output_size).uniform_(-3, 3)
-                    U_bias = torch.empty(1, self.reservoir_size).uniform_(-3, 3)
+                    W_in_bias = torch.empty(1, self.reservoir_size).uniform_(-3*P.sigma, 3*P.sigma)
+                    W_r_bias = torch.empty(1, self.reservoir_size).uniform_(-3*P.sigma, 3*P.sigma)
+                    W_out_bias = torch.empty(1, self.output_size).uniform_(-3*P.sigma, 3*P.sigma)
+                    U_bias = torch.empty(1, self.reservoir_size).uniform_(-3*P.sigma, 3*P.sigma)
 
             elif sample_dist == 'gaussian':
                 W_in_sample = torch.empty(self.reservoir_size, self.input_size).normal_(mu, sigma)
@@ -144,48 +144,57 @@ class EA(object):
                     W_out_bias = torch.empty(1, self.output_size).log_normal_(mu, sigma)
                     U_bias = torch.empty(1, self.reservoir_size).log_normal_(mu, sigma)
 
-            # Add sampled value to the current weights
-            reservoir['model'].layer1.weight = nn.Parameter(W_in_sample+reservoir['model'].layer1.weight, requires_grad=False)
-            reservoir['model'].layer2.weight = nn.Parameter(W_r_sample+reservoir['model'].layer2.weight, requires_grad=False)
-            reservoir['model'].layer3.weight = nn.Parameter(U_sample+reservoir['model'].layer3.weight, requires_grad=False)
-            reservoir['model'].layer4.weight = nn.Parameter(W_out_sample+reservoir['model'].layer4.weight, requires_grad=False)
+            # Add sampled value to the current weights, adjusted by the perturb rate.
+            reservoir['model'].layer1.weight = nn.Parameter((perturb_rate*W_in_sample)+reservoir['model'].layer1.weight,
+                                                            requires_grad=False)
+            reservoir['model'].layer2.weight = nn.Parameter((perturb_rate*W_r_sample)+reservoir['model'].layer2.weight,
+                                                            requires_grad=False)
+            reservoir['model'].layer3.weight = nn.Parameter((perturb_rate*U_sample)+reservoir['model'].layer3.weight,
+                                                            requires_grad=False)
+            reservoir['model'].layer4.weight = nn.Parameter((perturb_rate*W_out_sample)+reservoir['model'].layer4.weight,
+                                                            requires_grad=False)
 
+            # Add sampled value to the current bias weights, adjusted by the perturb rate.
             if mutate_bias:
-                reservoir['model'].layer1.bias = nn.Parameter(W_in_bias+reservoir['model'].layer1.bias, requires_grad=False)
-                reservoir['model'].layer2.bias = nn.Parameter(W_r_bias+reservoir['model'].layer2.bias, requires_grad=False)
-                reservoir['model'].layer3.bias = nn.Parameter(U_bias+reservoir['model'].layer3.bias, requires_grad=False)
-                reservoir['model'].layer4.bias = nn.Parameter(W_out_bias+reservoir['model'].layer4.bias, requires_grad=False)
+                reservoir['model'].layer1.bias = nn.Parameter((perturb_rate*W_in_bias)+reservoir['model'].layer1.bias,
+                                                              requires_grad=False)
+                reservoir['model'].layer2.bias = nn.Parameter((perturb_rate*W_r_bias)+reservoir['model'].layer2.bias,
+                                                              requires_grad=False)
+                reservoir['model'].layer3.bias = nn.Parameter((perturb_rate*U_bias)+reservoir['model'].layer3.bias,
+                                                              requires_grad=False)
+                reservoir['model'].layer4.bias = nn.Parameter((perturb_rate*W_out_bias)+reservoir['model'].layer4.bias,
+                                                              requires_grad=False)
 
         return mut_pop
 
-    def parent_offspring_selection(self, pop, recomb_pop, option):
+    def parent_offspring_selection(self, pop, recomb_pop):
         # Merge parents and childs
         total_pop = pop + recomb_pop
 
         # Select the top performing (lowest loss)
-        if option == 'loss':
+        if P.select_opt == 'loss':
             total_pop = sorted(total_pop, key=lambda k: k['loss_results'][-1])
             new_pop = total_pop[:len(pop)]
 
         # Select the top performing (lowest classification error)
-        elif option == 'classification_error':
+        elif P.select_opt == 'classification_error':
             total_pop = sorted(total_pop, key=lambda k: k['class_error_results'][-1], reverse=False)
             new_pop = total_pop[:len(pop)]
 
         return new_pop
 
-    def keep_best_selection(self, pop, offspring, option, k_best):
+    def keep_best_selection(self, pop, offspring):
 
-        offspring_best = len(pop) - k_best
+        offspring_best = len(pop) - P.k_best
 
-        if option == 'classification_error':
+        if P.select_opt == 'classification_error':
             value = 'class_error_results'
         else:
             value = 'loss_results'
 
         # Select the top performing (lowest classification error or lowest loss)
         pop_sorted = sorted(pop, key=lambda k: k[value][-1], reverse=False)
-        best_pop = pop_sorted[:k_best]
+        best_pop = pop_sorted[:P.k_best]
 
         offspring_sorted = sorted(offspring, key=lambda k: k[value][-1], reverse=False)
         best_offspring = offspring_sorted[:offspring_best]
@@ -194,7 +203,7 @@ class EA(object):
 
         return new_pop
 
-    def crossover(self, pop, mutate_bias):
+    def crossover(self, pop):
 
         # Using random crossover
 
@@ -205,7 +214,7 @@ class EA(object):
         U = []
         W_out = []
 
-        if mutate_bias:
+        if P.mutate_bias:
             W_in_bias = []
             W_r_bias = []
             U_bias = []
@@ -218,7 +227,7 @@ class EA(object):
             U.append(reservoir['model'].layer3.weight)
             W_out.append(reservoir['model'].layer4.weight)
 
-            if mutate_bias:
+            if P.mutate_bias:
                 W_in_bias.append(reservoir['model'].layer1.bias)
                 W_r_bias.append(reservoir['model'].layer2.bias)
                 U_bias.append(reservoir['model'].layer3.bias)
@@ -231,7 +240,7 @@ class EA(object):
             reservoir['model'].layer2.weight = random.choice(W_r)
             reservoir['model'].layer4.weight = random.choice(W_out)
 
-            if mutate_bias:
+            if P.mutate_bias:
                 reservoir['model'].layer1.bias = random.choice(W_in_bias)
                 reservoir['model'].layer3.bias = random.choice(U_bias)
                 reservoir['model'].layer2.bias = random.choice(W_r_bias)
@@ -239,43 +248,47 @@ class EA(object):
 
         return crossed_pop
 
-    def selection(self, pop, offspring, option, select_mech, k_best):
+    def selection(self, pop, offspring):
 
         # Parents + offspring selection
-        if select_mech == 'merge_all':
-            new_pop = self.parent_offspring_selection(pop, offspring, option)
-        elif select_mech == 'keep_k_best':
-            new_pop = self.keep_best_selection(pop, offspring, option, k_best)
+        if P.select_mech == 'merge_all':
+            new_pop = self.parent_offspring_selection(pop, offspring)
+        elif P.select_mech == 'keep_k_best':
+            new_pop = self.keep_best_selection(pop, offspring)
 
         return new_pop
 
-    def step(self, pop, mutate_opt, mutate_bias, perturb_rate, select_opt, select_mech, offspring_ratio,
-             sample_dist, k_best, loss_function, mu, sigma):
+    def dynamic_perturb_rate(self, epoch):  # Perturb rate decay
+        new_rate = P.perturb_rate * (1.0 / (1.0 + P.perturb_rate_decay * epoch))
+        return new_rate
+
+    def step(self, pop, epoch):
+        perturb_rate = self.dynamic_perturb_rate(epoch)
+        print('Perturb rate: %s, see below for mutated and crossed over population' %perturb_rate)
 
         # Apply some mutation and recombination
-        mut_pop = self.mutation(pop, mutate_opt, mutate_bias, sample_dist, perturb_rate, mu, sigma)
-        crossed_pop = self.crossover(pop,mutate_bias)
-        mut_crossed_pop = self.crossover(mut_pop,mutate_bias)
+        mut_pop = self.mutation(pop, perturb_rate)
+        crossed_pop = self.crossover(pop)
+        mut_crossed_pop = self.mutation(crossed_pop, perturb_rate)
 
         # Optional: offspring ratio to increase offspring size.
-        if offspring_ratio > 1:
-            for i in range(offspring_ratio - 1):
-                mut_pop += self.mutation(pop, mutate_opt, mutate_bias, sample_dist, perturb_rate)
-                crossed_pop += self.crossover(pop, mutate_bias)
-                mut_crossed_pop += self.crossover(mut_pop, mutate_bias)
+        if P.offspring_ratio > 1:
+            for i in range(P.offspring_ratio - 1):
+                mut_pop += self.mutation(pop, perturb_rate)
+                crossed_pop += self.crossover(pop)
+                mut_crossed_pop += self.mutation(crossed_pop, perturb_rate)
 
         # Merge (mutated pop) + ( crossed pop) + (mutated & crossed), so we have a large offspring pool to pick from.
-        merged_pop = mut_pop + crossed_pop + mut_crossed_pop
+        merged_pop = mut_pop + mut_crossed_pop # + crossed_pop
 
         # Get fitness from parents
-        pop = self.fitness(pop, loss_function, parents=True)
+        pop = self.fitness(pop, parents=True)
 
         # Get fitness from childs
-        print('Possible candidates for optimization')
-        merged_pop = self.fitness(merged_pop, loss_function, parents=False)
+        merged_pop = self.fitness(merged_pop, parents=False)
 
         # Survivor selection
-        new_pop = self.selection(pop, merged_pop, select_opt, select_mech, k_best)
+        new_pop = self.selection(pop, merged_pop)
 
         return new_pop
 

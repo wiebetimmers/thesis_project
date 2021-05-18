@@ -13,11 +13,11 @@ from EA import EA
 # Load data
 train_loader_digits, val_loader_digits, test_loader_digits = Data.get_digits_loaders(P.batch_size)
 
-baseline_model_file = open('models/baseline_model.pkl', 'rb')
+baseline_model_file = open('models/digits_baseline_model.pkl', 'rb')
 baseline_model = pickle.load(baseline_model_file)
-reservoir_model_no_evo_file = open('models/reservoir_model_no_evo.pkl', 'rb')
+reservoir_model_no_evo_file = open('models/digits_reservoir_model_no_evo.pkl', 'rb')
 reservoir_model_no_evo = pickle.load(reservoir_model_no_evo_file)
-ea_reservoir_model_file = open('models/EA_reservoir_model.pkl', 'rb')
+ea_reservoir_model_file = open('models/digits_EA_reservoir_model.pkl', 'rb')
 ea_reservoir_model = pickle.load(ea_reservoir_model_file)
 
 # Plot above plots in one plot
@@ -40,7 +40,7 @@ Ops.best_pop_plot(ea_reservoir_model,
               title='Complete Digits pop %s - epoch %s-  mutate opt %s - selectopt %s' %(P.population_size, P.n_epochs, P.mutate_opt, P.select_mech))
 
 # Save the test results + parameter settings to a file:
-sys.stdout = open("plots/results_digits_ep_%s_pop_%s.txt" %(P.n_epochs, P.population_size), "w")
+sys.stdout = open("plots/results_digits_ep_%s_pop_%s_mutateopt_%s_selectopt_%s.txt" %(P.n_epochs, P.population_size, P.mutate_opt, P.select_mech), "w")
 print('Network parameters:\n'
       'reservoir size: %s, \n'
       'n_hidden: %s, \n'
@@ -76,3 +76,4 @@ print(summary(baseline_model['model'], torch.zeros(1, 64), show_input=True, show
 print(summary(reservoir_model_no_evo['model'], torch.zeros(1, 64), show_input=True, show_hierarchical=False))
 
 sys.stdout.close()
+

@@ -212,3 +212,35 @@ def training(model, train_loader, val_loader, num_epochs, optimizer, loss_functi
     }
 
     return dict_results
+
+
+def combined_plot_result_distributions(epochs, loss_gaussian, class_error_gaussian,
+                                       loss_uniform, class_error_uniform,
+                                       loss_cauchy, class_error_cauchy,
+                                       loss_lognormal, class_error_lognormal,
+                                       border=None,
+                                       label_gaussian='', label_uniform='', label_cauchy='', label_lognormal='',
+                                       title=''):
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+    fig.suptitle('%s' % title)
+    ax1.set(ylabel='Loss', xlabel='Epochs')
+    ax2.set(ylabel='Classification Error', xlabel='Epochs')
+
+    ax1.plot(epochs, loss_gaussian, label=label_gaussian)
+    ax1.plot(epochs, loss_uniform, label=label_uniform)
+    ax1.plot(epochs, loss_cauchy, label=label_cauchy)
+    ax1.plot(epochs, loss_lognormal, label=label_lognormal)
+    ax2.plot(epochs, class_error_gaussian, label=label_gaussian)
+    ax2.plot(epochs, class_error_uniform, label=label_uniform)
+    ax2.plot(epochs, class_error_cauchy, label=label_cauchy)
+    ax2.plot(epochs, class_error_lognormal, label=label_lognormal)
+
+    if border != None:
+        ax1.axvline(border, label='EA optimizing start', c='r')
+        ax2.axvline(border, label='EA optimizing start', c='r')
+
+    ax1.legend(loc='upper right')
+    ax2.legend(loc='upper right')
+
+    plt.savefig('plots/%s.png' % (title), bbox_inches='tight')
+    return
