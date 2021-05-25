@@ -2,9 +2,12 @@ import matplotlib.pyplot as plt
 import torch
 import numpy as np
 import Datasets as Data
+import statistics as st
+import Parameters as P
 
 LABELS = Data.get_labels()
-plt.rcParams["figure.figsize"] = (20,3)
+plt.rcParams["figure.figsize"] = (10,3)
+
 
 # Function that transforms the tensor output to a predicted target name.
 def categoryFromOutput(output):
@@ -13,64 +16,71 @@ def categoryFromOutput(output):
     return LABELS[category_i]
 
 
-# Plot both accuracy as log loss.
-def plot_results(epochs, loss, class_error, title):
-    fig, (ax1, ax2) = plt.subplots(1, 2)
-    fig.suptitle('%s' % title)
-    ax1.set(ylabel='Loss')
-    ax2.set(ylabel='Classification Error', xlabel='Epochs')
+def get_stats(pop):
+    min_list = []
+    max_list = []
+    mean_list = []
+    std_list = []
+    for i in range(P.n_epochs):
+        epoch_list = []
+        for j in range(len(pop)):
+            epoch_list.append(pop[j]['loss_results'][i])
+        min_list.append(min(epoch_list))
+        max_list.append(max(epoch_list))
+        mean_list.append(st.mean(epoch_list))
+        std_list.append(st.stdev(epoch_list))
 
-    ax1.plot(epochs, loss)
-    ax2.plot(epochs, class_error)
-    plt.savefig('%s plot.png' % (title), bbox_inches='tight')
+    stats_results = {
+        'epoch': np.array(range(P.n_epochs)),
+        'min_list': np.array(min_list),
+        'max_list': np.array(max_list),
+        'mean_list': np.array(mean_list),
+        'std_list': np.array(std_list)}
 
+    return stats_results
+
+
+def plot_loss_exp1(gaussian, uniform, title=''):
+    stats_gaussian = get_stats(gaussian)
+    stats_uniform = get_stats(uniform)
+
+    plt.plot(stats_gaussian['epoch'], stats_gaussian['mean_list'], 'b-', label='Gaussian')
+    plt.fill_between(stats_gaussian['epoch'], stats_gaussian['min_list'],
+                     stats_gaussian['max_list'], color='b', alpha=0.2)
+
+    best_gaussian = gaussian[0]['loss_results'][-1]
+    print('Best val loss gaussian: %s' %best_gaussian)
+    print('Mean Last population gaussian: %s, std: %s' %(stats_gaussian['mean_list'][-1], stats_gaussian['std_list'][-1]))
+
+    plt.plot(stats_uniform['epoch'], stats_uniform['mean_list'], 'r-', label='Uniform')
+    plt.fill_between(stats_uniform['epoch'], stats_uniform['min_list'],
+                     stats_uniform['max_list'], color='r',
+                     alpha=0.2)
+
+    best_uniform = uniform[0]['loss_results'][-1]
+    print('Best val loss uniform: %s' % best_uniform)
+    print('Mean Last population uniform: %s, std: %s' % (stats_uniform['mean_list'][-1], stats_uniform['std_list'][-1]))
+
+    plt.legend(loc='upper right')
+    plt.title(r'$\alpha = %s , \sigma$ = %s' %(P.perturb_rate_decay, P.sigma))
+    plt.savefig('plots/exp1/%s.png' %(title), bbox_inches='tight')
     return
 
 
-def combined_plot_result(epochs, loss_bl, class_error_bl,
-                         loss_res, class_error_res,
-                         loss_evo, class_error_evo,
-                         border=None,
-                         label_bl='', label_res='', label_evo='', title=''):
-    fig, (ax1, ax2) = plt.subplots(1, 2)
-    fig.suptitle('%s' % title)
-    ax1.set(ylabel='Loss', xlabel='Epochs')
-    ax2.set(ylabel='Classification Error', xlabel='Epochs')
-
-    ax1.plot(epochs, loss_bl, label=label_bl)
-    ax1.plot(epochs, loss_res, label=label_res)
-    ax1.plot(epochs, loss_evo, label=label_evo)
-    ax2.plot(epochs, class_error_bl, label=label_bl)
-    ax2.plot(epochs, class_error_res, label=label_res)
-    ax2.plot(epochs, class_error_evo, label=label_evo)
+def combined_plot_exp3(epochs, loss_bl, loss_res, ea_reservoir, border=None, title=''):
+    stats_ea = get_stats(ea_reservoir)
+    plt.plot(stats_ea['epoch'], stats_ea['mean_list'], 'b-', label='EA Reservoir RNN')
+    plt.fill_between(stats_ea['epoch'], stats_ea['min_list'],
+                     stats_ea['max_list'], color='b', alpha=0.2)
+    plt.plot(epochs, loss_bl, label='Baseline RNN')
+    plt.plot(epochs, loss_res, label='Reservoir RNN')
 
     if border != None:
-        ax1.axvline(border, label='EA optimizing start', c='r')
-        ax2.axvline(border, label='EA optimizing start', c='r')
+        plt.axvline(P.backprop_epochs, label='EA optimizing start', c='r')
 
-    ax1.legend(loc='upper right')
-    ax2.legend(loc='upper right')
-
-    plt.savefig('plots/%s.png' % (title), bbox_inches='tight')
-    return
-
-def best_pop_plot(best_pop, best_individual, title):
-    fig, (ax1, ax2) = plt.subplots(1, 2)
-    fig.suptitle('%s' % title)
-    ax1.set(ylabel='Loss')
-    ax2.set(ylabel='Classification Error', xlabel='Epochs')
-
-    for model in best_pop:
-        ax1.plot(model['epoch'], model['loss_results'], c='b')
-        ax2.plot(model['epoch'], model['class_error_results'], c='b')
-
-    ax1.plot(best_individual['epoch'], best_individual['loss_results'], c='r', label='Best individual')
-    ax2.plot(best_individual['epoch'], best_individual['class_error_results'], c='r', label='Best individual')
-
-    ax1.legend(loc='upper right')
-    ax2.legend(loc='upper right')
-    plt.savefig('plots/%s.png' % (title), bbox_inches='tight')
-
+    plt.legend(loc='upper right')
+    plt.title('')
+    plt.savefig('plots/exp3/%s.png' % (title), bbox_inches='tight')
     return
 
 
@@ -212,35 +222,3 @@ def training(model, train_loader, val_loader, num_epochs, optimizer, loss_functi
     }
 
     return dict_results
-
-
-def combined_plot_result_distributions(epochs, loss_gaussian, class_error_gaussian,
-                                       loss_uniform, class_error_uniform,
-                                       loss_cauchy, class_error_cauchy,
-                                       loss_lognormal, class_error_lognormal,
-                                       border=None,
-                                       label_gaussian='', label_uniform='', label_cauchy='', label_lognormal='',
-                                       title=''):
-    fig, (ax1, ax2) = plt.subplots(1, 2)
-    fig.suptitle('%s' % title)
-    ax1.set(ylabel='Loss', xlabel='Epochs')
-    ax2.set(ylabel='Classification Error', xlabel='Epochs')
-
-    ax1.plot(epochs, loss_gaussian, label=label_gaussian)
-    ax1.plot(epochs, loss_uniform, label=label_uniform)
-    ax1.plot(epochs, loss_cauchy, label=label_cauchy)
-    ax1.plot(epochs, loss_lognormal, label=label_lognormal)
-    ax2.plot(epochs, class_error_gaussian, label=label_gaussian)
-    ax2.plot(epochs, class_error_uniform, label=label_uniform)
-    ax2.plot(epochs, class_error_cauchy, label=label_cauchy)
-    ax2.plot(epochs, class_error_lognormal, label=label_lognormal)
-
-    if border != None:
-        ax1.axvline(border, label='EA optimizing start', c='r')
-        ax2.axvline(border, label='EA optimizing start', c='r')
-
-    ax1.legend(loc='upper right')
-    ax2.legend(loc='upper right')
-
-    plt.savefig('plots/%s.png' % (title), bbox_inches='tight')
-    return

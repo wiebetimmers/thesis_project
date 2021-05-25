@@ -167,7 +167,7 @@ class EA(object):
 
         return mut_pop
 
-    def parent_offspring_selection(self, pop, recomb_pop):
+    def merge_all_selection(self, pop, recomb_pop):
         # Merge parents and childs
         total_pop = pop + recomb_pop
 
@@ -202,6 +202,19 @@ class EA(object):
         new_pop = best_pop + best_offspring
 
         return new_pop
+
+    def keep_best_offspring(self, pop, offspring):
+
+        if P.select_opt == 'classification_error':
+            value = 'class_error_results'
+        else:
+            value = 'loss_results'
+
+        # Select the best performing offspring
+        offspring_sorted = sorted(offspring, key=lambda k: k[value][-1], reverse=False)
+        best_offspring = offspring_sorted[:len(pop)]
+
+        return best_offspring
 
     def crossover(self, pop):
 
@@ -252,9 +265,11 @@ class EA(object):
 
         # Parents + offspring selection
         if P.select_mech == 'merge_all':
-            new_pop = self.parent_offspring_selection(pop, offspring)
+            new_pop = self.merge_all_selection(pop, offspring)
         elif P.select_mech == 'keep_k_best':
             new_pop = self.keep_best_selection(pop, offspring)
+        elif P.select_mech == 'keep_best_offspring':
+            new_pop = self.keep_best_offspring(pop, offspring)
 
         return new_pop
 
@@ -263,6 +278,7 @@ class EA(object):
         return new_rate
 
     def step(self, pop, epoch):
+
         perturb_rate = self.dynamic_perturb_rate(epoch)
         print('Perturb rate: %s, see below for mutated and crossed over population' %perturb_rate)
 
