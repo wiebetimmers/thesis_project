@@ -6,6 +6,7 @@ Update 25-5:
 - files are now redesigned to work best for experiment 1, 2, 3
 - implemented best offspring selection
 - plotting improved
+- created a experimental setup , v1
 
 ### Working on:
 - Finalizing the plots, labels, axis etc. 
