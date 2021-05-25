@@ -10,6 +10,7 @@ Update 25-5:
 
 ### Working on:
 - Finalizing the plots, labels, axis etc. 
+- Also store the mean, std dev, min and max of the last population
 - A situation in which we keep the output layer constant after a few training cycles, then only perform EA optimization on the non-output layers. 
 
 
