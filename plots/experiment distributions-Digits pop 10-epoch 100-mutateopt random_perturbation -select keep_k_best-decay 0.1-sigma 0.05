@@ -1,9 +1,0 @@
-Epoch: 
-
-Final score Digits on test set- gaussian - Loss of: 0.4194390256399543 - Classification Error of: 12.527963638305664
-Epoch: Final score Digits on test set- uniform - Loss of: 0.4322489593386383 - Classification Error of: 13.422818183898926
-Epoch: Final score Digits on test set- cauchy - Loss of: 0.36976304256942716 - Classification Error of: 10.514541625976562
-Epoch: Final score Digits on test set- lognormal - Loss of: 0.3597090420306929 - Classification Error of: 10.961968421936035
-
-Execution time was: (hours:minute:seconds:microseconds) 0:15:06.285805 
-
