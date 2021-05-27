@@ -1,0 +1,14 @@
+Best val loss gaussian: 0.17766656739371164
+Mean Last population gaussian: 0.18567603302001953, std: 0.004530938134343426
+Best val loss uniform: 0.19134902817862373
+Mean Last population uniform: 0.23761087553841725, std: 0.040358674636289206
+
+
+Final score Digits on test set- gaussian
+Loss of: 0.5117715903843276 - Classification Error of: 14.317673683166504
+
+Final score Digits on test set- uniform
+Loss of: 0.4254513021550189 - Classification Error of: 11.18568229675293
+
+Execution time was: (hours:minute:seconds:microseconds) 0:00:17.357108 
+

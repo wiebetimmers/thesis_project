@@ -266,7 +266,7 @@ class EA(object):
         # Parents + offspring selection
         if P.select_mech == 'merge_all':
             new_pop = self.merge_all_selection(pop, offspring)
-        elif P.select_mech == 'keep_k_best':
+        elif P.select_mech == 'keep_k_best_parents':
             new_pop = self.keep_best_selection(pop, offspring)
         elif P.select_mech == 'keep_best_offspring':
             new_pop = self.keep_best_offspring(pop, offspring)

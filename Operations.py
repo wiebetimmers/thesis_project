@@ -49,7 +49,9 @@ def plot_loss_exp1(gaussian, uniform, title=''):
                      stats_gaussian['max_list'], color='b', alpha=0.2)
 
     best_gaussian = gaussian[0]['loss_results'][-1]
+    worst_gaussian = gaussian[-1]['loss_results'][-1]
     print('Best val loss gaussian: %s' %best_gaussian)
+    print('Worst val loss gaussian: %s' %worst_gaussian)
     print('Mean Last population gaussian: %s, std: %s' %(stats_gaussian['mean_list'][-1], stats_gaussian['std_list'][-1]))
 
     plt.plot(stats_uniform['epoch'], stats_uniform['mean_list'], 'r-', label='Uniform')
@@ -58,12 +60,50 @@ def plot_loss_exp1(gaussian, uniform, title=''):
                      alpha=0.2)
 
     best_uniform = uniform[0]['loss_results'][-1]
+    worst_uniform = uniform[-1]['loss_results'][-1]
     print('Best val loss uniform: %s' % best_uniform)
-    print('Mean Last population uniform: %s, std: %s' % (stats_uniform['mean_list'][-1], stats_uniform['std_list'][-1]))
+    print('Worst val loss uniform: %s' % worst_uniform)
+    print('Mean Last population uniform: %s, std: %s\n\n' % (stats_uniform['mean_list'][-1], stats_uniform['std_list'][-1]))
 
+    plt.xlabel('Epoch')
+    plt.ylabel('NLL')
     plt.legend(loc='upper right')
     plt.title(r'$\alpha = %s , \sigma$ = %s' %(P.perturb_rate_decay, P.sigma))
     plt.savefig('plots/exp1/%s.png' %(title), bbox_inches='tight')
+
+    return best_gaussian, stats_gaussian, best_uniform, stats_uniform
+
+
+def plot_loss_exp2(random_pert, diff_mut, title=''):
+    stats_random_pert = get_stats(random_pert)
+    stats_diff_mut = get_stats(diff_mut)
+
+    plt.plot(stats_random_pert['epoch'], stats_random_pert['mean_list'], 'b-', label='Random Perturbation')
+    plt.fill_between(stats_random_pert['epoch'], stats_random_pert['min_list'],
+                     stats_random_pert['max_list'], color='b', alpha=0.2)
+
+    best_random_pert = random_pert[0]['loss_results'][-1]
+    worst_random_pert = random_pert[-1]['loss_results'][-1]
+    print('Best val loss random perturbation: %s' % best_random_pert)
+    print('Worst val loss random perturbation: %s' % worst_random_pert)
+    print('Mean last population random perturbation: %s, std: %s' %(stats_random_pert['mean_list'][-1], stats_random_pert['std_list'][-1]))
+
+    plt.plot(stats_diff_mut['epoch'], stats_diff_mut['mean_list'], 'r-', label='Differential Mutation')
+    plt.fill_between(stats_diff_mut['epoch'], stats_diff_mut['min_list'],
+                     stats_diff_mut['max_list'], color='r',
+                     alpha=0.2)
+
+    best_diff_mut = diff_mut[0]['loss_results'][-1]
+    worst_diff_mut  = diff_mut[-1]['loss_results'][-1]
+    print('Best val loss diff mutation: %s' % best_diff_mut)
+    print('Worst val loss diff mutation: %s' % worst_diff_mut)
+    print('Mean Last population diff mutation: %s, std: %s\n\n' % (stats_diff_mut['mean_list'][-1], stats_diff_mut['std_list'][-1]))
+
+    plt.xlabel('Epoch')
+    plt.ylabel('NLL')
+    plt.legend(loc='upper right')
+    plt.title(r'$\alpha = %s$, %s selection' %(P.perturb_rate_decay, P.select_mech))
+    plt.savefig('plots/exp2/%s.png' %(title), bbox_inches='tight')
     return
 
 
@@ -78,9 +118,48 @@ def combined_plot_exp3(epochs, loss_bl, loss_res, ea_reservoir, border=None, tit
     if border != None:
         plt.axvline(P.backprop_epochs, label='EA optimizing start', c='r')
 
+    plt.xlabel('Epoch')
+    plt.ylabel('NLL')
     plt.legend(loc='upper right')
-    plt.title('')
-    plt.savefig('plots/exp3/%s.png' % (title), bbox_inches='tight')
+
+    if P.mutate_bias:
+        bias = 'Bias mutation'
+    else:
+        bias = 'No bias mutation'
+
+    plt.title(r'$\alpha = %s$, %s' %(P.perturb_rate_decay, bias))
+    plt.savefig('plots/exp3/%s.png' % title, bbox_inches='tight')
+    return
+
+
+def print_parameters():
+    print('Network parameters:\n'
+          'reservoir size: %s, \n'
+          'n_hidden: %s, \n'
+          'learning rate: %s, \n'
+          'momentum sgd: %s, \n'
+          'backprop epochs: %s, \n'
+          'T: %s, \n'
+          'loss_function: %s \n' % (P.reservoir_size, P.n_hidden, P.lr_SGD, P.momentum_SGD,
+                                    P.backprop_epochs, P.T, P.loss_function))
+    print('EA parameters: \n'
+          ' pop size: %s,\n'
+          'generations: %s,\n'
+          'mutate opt: %s,\n'
+          'perturb rate: %s,\n'
+          'mutate_bias: %s\n'
+          'sample_dist: %s\n'
+          'mu: %s\n'
+          'sigma: %s\n'
+          'select opt: %s\n'
+          'select mech: %s\n'
+          'k_best: %s\n'
+          'offspring ratio: %s\n'
+          'n epochs: %s\n' % (P.population_size, P.generations, P.mutate_opt, P.perturb_rate,
+                              P.mutate_bias, P.sample_dist, P.mu, P.sigma, P.select_opt, P.select_mech, P.k_best,
+                              P.offspring_ratio, P.n_epochs))
+
+    print('# --------------------------------------------------------------------------\n')
     return
 
 
@@ -115,7 +194,7 @@ def class_error(pred_targets_list, gold_targets_list):
 
 
 # Evaluation -> used for validation and test set.
-def evaluation(val_loader, model, epoch, loss_function):
+def evaluation(val_loader, model, epoch, loss_function, test_set=False):
     # Evaluating our performance so far
     model.eval()
 
@@ -148,7 +227,10 @@ def evaluation(val_loader, model, epoch, loss_function):
     loss = loss / N
 
     classification_error = class_error(pred_target_total_acc, target_total_acc)
-    print('Epoch: %s - Loss of: %s - Classification Error of: %s' % (epoch, loss, classification_error))
+    if not test_set:
+        print('Epoch: %s - Loss of: %s - Classification Error of: %s' % (epoch, loss, classification_error))
+    else:
+        print('Loss of: %s - Classification Error of: %s' % (loss, classification_error))
 
     return epoch, loss, classification_error
 

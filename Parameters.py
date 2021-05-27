@@ -20,8 +20,8 @@ max_loss_iter = 10  # not  used yet
 
 
 # EA parameters
-population_size = 15
-generations = 195     # epochs without backprop
+population_size = 5
+generations = 5     # epochs without backprop
 mutate_opt = 'random_perturbation'  # Options: 'random_perturbation' , 'diff_mutation'
 perturb_rate = 0.5  # initial rate, Fraction of sample mutation added to the population
 perturb_rate_decay = 0.1
@@ -30,7 +30,7 @@ sample_dist = 'gaussian'       # If using random perturbation, options: 'gaussia
 mu = 0  # If we require a mu
 sigma = 0.05  # If we require a variance
 select_opt = 'loss'  # 'classification_error' or 'loss'
-select_mech = 'keep_k_best'   # Options: 'keep_k_best'= k best of the parents , 'merge_all' , 'keep_best_offspring'
+select_mech = 'keep_k_best_parents'   # Options: 'keep_k_best_parents' , 'merge_all' , 'keep_best_offspring'
 k_best = population_size // 5   # Keep 1/k of the population as the best for new pop, the rest is new.
 offspring_ratio = 1    # Optional, increase the offspring by factor k (k times as much offspring)
 

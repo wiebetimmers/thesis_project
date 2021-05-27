@@ -31,8 +31,16 @@ for i in range(P.population_size):
                                   optimizer_evo_digits, P.loss_function, P.max_loss_iter)
     reservoir_set_digits.append(trained_evo_digits)
 
-# Initialize the population
-new_pop = reservoir_set_digits
+
+# Initialize the population - store the backpropped 5 epochs so we can continue to use the same for diff experiments
+# Comment this part out if there already is a sampled begin population
+initial_model = open('models/exp3/digits_initial_model_start_pop_%s.pkl' %P.population_size, 'wb')
+pickle.dump(reservoir_set_digits, initial_model)
+initial_model.close()
+
+
+initial_model = open('models/exp3/digits_initial_model_start_pop_%s.pkl' %P.population_size, 'rb')
+new_pop = pickle.load(initial_model)
 
 # Perform ea steps
 for i in range(P.generations):
@@ -45,7 +53,7 @@ elif P.select_opt == 'loss':
     best_pop_digits = sorted(new_pop, key=lambda k: k['loss_results'][-1], reverse=False)
 
 # Save model and results dict
-ea_reservoir_model = open('models/digits_EA_reservoir_model.pkl', 'wb')
+ea_reservoir_model = open('models/exp3/digits_EA_reservoir_model.pkl', 'wb')
 pickle.dump(best_pop_digits, ea_reservoir_model)
 ea_reservoir_model.close()
 
@@ -58,7 +66,7 @@ optimizer_digits = optim.SGD([p for p in bl_model_digits.parameters() if p.requi
 trained_bl_digits = Ops.training(bl_model_digits, train_loader_digits, val_loader_digits, P.n_epochs, optimizer_digits, P.loss_function, P.max_loss_iter)
 
 # Save model and results dict
-baseline_model = open('models/digits_baseline_model.pkl', 'wb')
+baseline_model = open('models/exp3/digits_baseline_model.pkl', 'wb')
 pickle.dump(trained_bl_digits, baseline_model)
 baseline_model.close()
 
@@ -73,7 +81,7 @@ trained_res_digits = Ops.training(res_model_digits, train_loader_digits, val_loa
                                   optimizer_digits, P.loss_function, P.max_loss_iter)
 
 # Save model and results dict
-reservoir_model_no_evo = open('models/digits_reservoir_model_no_evo.pkl', 'wb')
+reservoir_model_no_evo = open('models/exp3/digits_reservoir_model_no_evo.pkl', 'wb')
 pickle.dump(trained_res_digits, reservoir_model_no_evo)
 reservoir_model_no_evo.close()
 
@@ -81,44 +89,27 @@ reservoir_model_no_evo.close()
 # Plot the results and save other data to results text file
 # -----------------------------------------------------------------------------------------------------------
 
-baseline_model_file = open('models/digits_baseline_model.pkl', 'rb')
+baseline_model_file = open('models/exp3/digits_baseline_model.pkl', 'rb')
 baseline_model = pickle.load(baseline_model_file)
-reservoir_model_no_evo_file = open('models/digits_reservoir_model_no_evo.pkl', 'rb')
+reservoir_model_no_evo_file = open('models/exp3/digits_reservoir_model_no_evo.pkl', 'rb')
 reservoir_model_no_evo = pickle.load(reservoir_model_no_evo_file)
-ea_reservoir_model_file = open('models/digits_EA_reservoir_model.pkl', 'rb')
+ea_reservoir_model_file = open('models/exp3/digits_EA_reservoir_model.pkl', 'rb')
 ea_reservoir_model = pickle.load(ea_reservoir_model_file)
 
-Ops.combined_plot_exp3(baseline_model['epoch'], baseline_model['loss_results'], reservoir_model_no_evo['loss_results'],
-                         ea_reservoir_model, border=None, title='Digits pop %s - epoch %s - mutateopt %s - selectopt %s'
-                                                                %(P.population_size, P.n_epochs,
-                                                                  P.mutate_opt, P.select_mech))
-
 # Save the test results + parameter settings to a file:
-sys.stdout = open("plots/exp3/results/digits_ep_%s_pop_%s_mutateopt_%s_selectopt_%s.txt" %(P.n_epochs, P.population_size, P.mutate_opt, P.select_mech), "w")
-print('Network parameters:\n'
-      'reservoir size: %s, \n'
-      'n_hidden: %s, \n'
-      'learning rate: %s, \n'
-      'momentum sgd: %s, \n'
-      'backprop epochs: %s, \n'
-      'T: %s, \n'
-      'loss_function: %s \n' % (P.reservoir_size, P.n_hidden, P.lr_SGD, P.momentum_SGD,
-                             P.backprop_epochs, P.T, P.loss_function))
-print('EA parameters: \n'
-      ' pop size: %s,\n'
-      'generations: %s,\n'
-      'mutate opt: %s,\n'
-      'perturb rate: %s,\n'
-      'mutate_bias: %s\n'
-      'sample_dist: %s\n'
-      'mu: %s\n'
-      'sigma: %s\n'
-      'select opt: %s\n'
-      'select mech: %s\n'
-      'k_best: %s\n'
-      'offspring ratio: %s\n'
-      'n epochs: %s\n' % (P.population_size,P.generations , P.mutate_opt, P.perturb_rate,
-P.mutate_bias, P.sample_dist, P.mu, P.sigma,  P.select_opt,  P.select_mech,  P.k_best,  P.offspring_ratio, P.n_epochs))
+sys.stdout = open("plots/exp3/results/digits_ep_%s_pop_%s_mutateopt_%s_selectopt_%s.txt" %(P.n_epochs,
+                                                                                           P.population_size,
+                                                                                           P.mutate_opt,
+                                                                                           P.select_mech), "w")
+
+Ops.combined_plot_exp3(baseline_model['epoch'], baseline_model['loss_results'], reservoir_model_no_evo['loss_results'],
+                       ea_reservoir_model, border=None, title='Digits pop %s - epoch %s - mutateopt %s'
+                                                              '- select_opt %s '
+                                                              '- decay %s - sigma %s'
+                                                              % (P.population_size, P.n_epochs,P.mutate_opt,
+                                                                 P.select_mech, P.perturb_rate_decay, P.sigma))
+
+Ops.print_parameters()
 
 test_result_digits2 = Ops.evaluation(test_loader_digits, baseline_model['model'], 'Final score Digits on test set- baseline', P.loss_function)
 test_result_digits = Ops.evaluation(test_loader_digits, reservoir_model_no_evo['model'], 'Final score Digits on test set - only output train', P.loss_function)
@@ -129,10 +120,9 @@ print(summary(baseline_model['model'], torch.zeros(1, 64), show_input=True, show
 # Reservoir RNN model
 print(summary(reservoir_model_no_evo['model'], torch.zeros(1, 64), show_input=True, show_hierarchical=False))
 
-sys.stdout.close()
-
 # Print execution time:
 exc_time = datetime.datetime.now() - begin_time
 
 print('\nExecution time was: (hours:minute:seconds:microseconds) %s \n' %exc_time)
 
+sys.stdout.close()

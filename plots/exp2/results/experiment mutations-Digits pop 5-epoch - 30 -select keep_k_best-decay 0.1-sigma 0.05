@@ -1,0 +1,15 @@
+Best val loss random perturbation: 0.13581372329166957
+Worst val loss random perturbation: 0.15686788967677526
+Mean last population random perturbation: 0.14616352013179235, std: 0.0098374649040937
+Best val loss diff mutation: 0.1755205522264753
+Worst val loss diff mutation: 0.17552061898367746
+Mean Last population diff mutation: 0.17552059146336146, std: 2.675634986695695e-08
+
+
+Final score Digits on test set- random perturbation
+Loss of: 0.41548833271001007 - Classification Error of: 12.527963638305664
+Final score Digits on test set- diff mutation
+Loss of: 0.34515134973547335 - Classification Error of: 11.633109092712402
+
+Execution time was: (hours:minute:seconds:microseconds) 0:00:17.989417 
+

@@ -17,16 +17,16 @@ sample_dist: gaussian
 mu: 0
 sigma: 0.05
 select opt: loss
-select mech: keep_k_best
+select mech: keep_k_best_parents
 k_best: 1
 offspring ratio: 1
 n epochs: 10
 
 # --------------------------------------------------------------------------
 
-Epoch: Final score Digits on test set- baseline - Loss of: 0.5218644894209484 - Classification Error of: 10.290827751159668
-Epoch: Final score Digits on test set - only output train - Loss of: 0.3682646506051356 - Classification Error of: 11.633109092712402
-Epoch: Final score Digits on test set- with evolution - Loss of: 0.4051853602364559 - Classification Error of: 12.080536842346191
+Epoch: Final score Digits on test set- baseline - Loss of: 0.5232288029369891 - Classification Error of: 9.6196870803833
+Epoch: Final score Digits on test set - only output train - Loss of: 0.41135638298871 - Classification Error of: 10.514541625976562
+Epoch: Final score Digits on test set- with evolution - Loss of: 0.37745643462110684 - Classification Error of: 11.18568229675293
 -----------------------------------------------------------------------
       Layer (type)         Input Shape         Param #     Tr. Param #
 =======================================================================
@@ -77,5 +77,5 @@ Trainable params: 1,290
 Non-trainable params: 132,480
 -----------------------------------------------------------------------
 
-Execution time was: (hours:minute:seconds:microseconds) 0:00:21.209351 
+Execution time was: (hours:minute:seconds:microseconds) 0:00:22.514304 
 
