@@ -13,8 +13,8 @@ reservoir_set_digits = []
 
 for i in range(P.population_size):
     res_evo_digits = Net.Reservoir_RNN(P.input_size_digits, P.reservoir_size, P.n_labels, P.T, dataset='Digits')
-    optimizer_evo_digits = optim.SGD([p for p in res_evo_digits.parameters() if p.requires_grad == True], lr=P.lr_SGD,
-                                         momentum=P.momentum_SGD)
+    optimizer_evo_digits = optim.SGD([p for p in res_evo_digits.parameters() if p.requires_grad], lr=P.lr_SGD,
+                                     momentum=P.momentum_SGD)
     trained_evo_digits = Ops.training(res_evo_digits, train_loader_digits, val_loader_digits, P.backprop_epochs,
                                       optimizer_evo_digits, P.loss_function, P.max_loss_iter)
     reservoir_set_digits.append(trained_evo_digits)

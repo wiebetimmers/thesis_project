@@ -6,6 +6,7 @@ import torchvision
 import numpy as np
 from torchvision import transforms
 
+
 class Digits(Dataset):
     """Scikit-Learn Digits dataset."""
 
@@ -31,7 +32,7 @@ class Digits(Dataset):
         sample_y = self.targets[idx]
         if self.transforms:
             sample_x = self.transforms(sample_x)
-        return (sample_x, sample_y)
+        return sample_x, sample_y
 
 
 class MNIST(Dataset):
@@ -79,7 +80,7 @@ class MNIST(Dataset):
         sample_y = self.targets[idx]
         if self.transforms:
             sample_x = self.transforms(sample_x)
-        return (sample_x, sample_y)
+        return sample_x, sample_y
 
 
 def get_digits_loaders(batch_size=50):

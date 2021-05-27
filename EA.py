@@ -53,7 +53,7 @@ class EA(object):
 
         if P.mutate_opt == 'random_perturbation':
             mut_pop = self.random_perturbation(pop, P.sample_dist, P.mutate_bias, P.mu, P.sigma, perturb_rate)
-        elif P.mutate_opt == 'diff_mutation':
+        else:  # 'diff_mutation'
             mut_pop = self.diff_mutation(pop, perturb_rate)
 
         return mut_pop
@@ -177,7 +177,7 @@ class EA(object):
             new_pop = total_pop[:len(pop)]
 
         # Select the top performing (lowest classification error)
-        elif P.select_opt == 'classification_error':
+        else:  # 'classification_error'
             total_pop = sorted(total_pop, key=lambda k: k['class_error_results'][-1], reverse=False)
             new_pop = total_pop[:len(pop)]
 
@@ -268,7 +268,7 @@ class EA(object):
             new_pop = self.merge_all_selection(pop, offspring)
         elif P.select_mech == 'keep_k_best_parents':
             new_pop = self.keep_best_selection(pop, offspring)
-        elif P.select_mech == 'keep_best_offspring':
+        else:  # 'keep_best_offspring'
             new_pop = self.keep_best_offspring(pop, offspring)
 
         return new_pop
@@ -280,7 +280,7 @@ class EA(object):
     def step(self, pop, epoch):
 
         perturb_rate = self.dynamic_perturb_rate(epoch)
-        print('Perturb rate: %s, see below for mutated and crossed over population' %perturb_rate)
+        print('Perturb rate: %s, see below for mutated and crossed over population' % perturb_rate)
 
         # Apply some mutation and recombination
         mut_pop = self.mutation(pop, perturb_rate)
@@ -295,7 +295,7 @@ class EA(object):
                 mut_crossed_pop += self.mutation(crossed_pop, perturb_rate)
 
         # Merge (mutated pop) + ( crossed pop) + (mutated & crossed), so we have a large offspring pool to pick from.
-        merged_pop = mut_pop + mut_crossed_pop # + crossed_pop
+        merged_pop = mut_pop + mut_crossed_pop + crossed_pop  # + crossed_pop
 
         # Get fitness from parents
         pop = self.fitness(pop, parents=True)
@@ -307,5 +307,3 @@ class EA(object):
         new_pop = self.selection(pop, merged_pop)
 
         return new_pop
-
-

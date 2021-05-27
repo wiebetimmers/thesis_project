@@ -23,6 +23,7 @@ Trying out among different pop sizes + additional interesting customized paramet
 
 pop_size = [10, 20, 50]
 mutate_bias_weights = [True, False]
+off_spring_ratio = 1 , 2 , 3 ?
 
 --------------------------------------------------------------------------------------------------------
 

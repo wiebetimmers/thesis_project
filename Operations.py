@@ -6,11 +6,11 @@ import statistics as st
 import Parameters as P
 
 LABELS = Data.get_labels()
-plt.rcParams["figure.figsize"] = (10,3)
+plt.rcParams["figure.figsize"] = (5, 3)
 
 
 # Function that transforms the tensor output to a predicted target name.
-def categoryFromOutput(output):
+def category_from_output(output):
     top_n, top_i = output.topk(1)
     category_i = top_i[0].item()
     return LABELS[category_i]
@@ -50,26 +50,27 @@ def plot_loss_exp1(gaussian, uniform, title=''):
 
     best_gaussian = gaussian[0]['loss_results'][-1]
     worst_gaussian = gaussian[-1]['loss_results'][-1]
-    print('Best val loss gaussian: %s' %best_gaussian)
-    print('Worst val loss gaussian: %s' %worst_gaussian)
-    print('Mean Last population gaussian: %s, std: %s' %(stats_gaussian['mean_list'][-1], stats_gaussian['std_list'][-1]))
+    print('Best val loss gaussian: %s' % best_gaussian)
+    print('Worst val loss gaussian: %s' % worst_gaussian)
+    print('Mean Last population gaussian: %s, std: %s' % (stats_gaussian['mean_list'][-1],
+                                                          stats_gaussian['std_list'][-1]))
 
     plt.plot(stats_uniform['epoch'], stats_uniform['mean_list'], 'r-', label='Uniform')
     plt.fill_between(stats_uniform['epoch'], stats_uniform['min_list'],
-                     stats_uniform['max_list'], color='r',
-                     alpha=0.2)
+                     stats_uniform['max_list'], color='r', alpha=0.2)
 
     best_uniform = uniform[0]['loss_results'][-1]
     worst_uniform = uniform[-1]['loss_results'][-1]
     print('Best val loss uniform: %s' % best_uniform)
     print('Worst val loss uniform: %s' % worst_uniform)
-    print('Mean Last population uniform: %s, std: %s\n\n' % (stats_uniform['mean_list'][-1], stats_uniform['std_list'][-1]))
+    print('Mean Last population uniform: %s, std: %s\n\n' % (stats_uniform['mean_list'][-1],
+                                                             stats_uniform['std_list'][-1]))
 
     plt.xlabel('Epoch')
     plt.ylabel('NLL')
     plt.legend(loc='upper right')
-    plt.title(r'$\alpha = %s , \sigma$ = %s' %(P.perturb_rate_decay, P.sigma))
-    plt.savefig('plots/exp1/%s.png' %(title), bbox_inches='tight')
+    plt.title(r'$\alpha = %s , \sigma$ = %s' % (P.perturb_rate_decay, P.sigma))
+    plt.savefig('plots/exp1/%s.png' % title, bbox_inches='tight')
 
     return best_gaussian, stats_gaussian, best_uniform, stats_uniform
 
@@ -78,7 +79,7 @@ def plot_loss_exp2(random_pert, diff_mut, title=''):
     stats_random_pert = get_stats(random_pert)
     stats_diff_mut = get_stats(diff_mut)
 
-    plt.plot(stats_random_pert['epoch'], stats_random_pert['mean_list'], 'b-', label='Random Perturbation')
+    plt.plot(stats_random_pert['epoch'], stats_random_pert['mean_list'], 'g-', label='Random Perturbation')
     plt.fill_between(stats_random_pert['epoch'], stats_random_pert['min_list'],
                      stats_random_pert['max_list'], color='b', alpha=0.2)
 
@@ -86,24 +87,26 @@ def plot_loss_exp2(random_pert, diff_mut, title=''):
     worst_random_pert = random_pert[-1]['loss_results'][-1]
     print('Best val loss random perturbation: %s' % best_random_pert)
     print('Worst val loss random perturbation: %s' % worst_random_pert)
-    print('Mean last population random perturbation: %s, std: %s' %(stats_random_pert['mean_list'][-1], stats_random_pert['std_list'][-1]))
+    print('Mean last population random perturbation: %s, std: %s' % (stats_random_pert['mean_list'][-1],
+                                                                     stats_random_pert['std_list'][-1]))
 
-    plt.plot(stats_diff_mut['epoch'], stats_diff_mut['mean_list'], 'r-', label='Differential Mutation')
+    plt.plot(stats_diff_mut['epoch'], stats_diff_mut['mean_list'], 'm-', label='Differential Mutation')
     plt.fill_between(stats_diff_mut['epoch'], stats_diff_mut['min_list'],
                      stats_diff_mut['max_list'], color='r',
                      alpha=0.2)
 
     best_diff_mut = diff_mut[0]['loss_results'][-1]
-    worst_diff_mut  = diff_mut[-1]['loss_results'][-1]
+    worst_diff_mut = diff_mut[-1]['loss_results'][-1]
     print('Best val loss diff mutation: %s' % best_diff_mut)
     print('Worst val loss diff mutation: %s' % worst_diff_mut)
-    print('Mean Last population diff mutation: %s, std: %s\n\n' % (stats_diff_mut['mean_list'][-1], stats_diff_mut['std_list'][-1]))
+    print('Mean Last population diff mutation: %s, std: %s\n\n' % (stats_diff_mut['mean_list'][-1],
+                                                                   stats_diff_mut['std_list'][-1]))
 
     plt.xlabel('Epoch')
     plt.ylabel('NLL')
     plt.legend(loc='upper right')
-    plt.title(r'$\alpha = %s$, %s selection' %(P.perturb_rate_decay, P.select_mech))
-    plt.savefig('plots/exp2/%s.png' %(title), bbox_inches='tight')
+    plt.title(r'$\alpha = %s$, %s selection' % (P.perturb_rate_decay, P.select_mech))
+    plt.savefig('plots/exp2/%s.png' % title, bbox_inches='tight')
     return
 
 
@@ -115,7 +118,7 @@ def combined_plot_exp3(epochs, loss_bl, loss_res, ea_reservoir, border=None, tit
     plt.plot(epochs, loss_bl, label='Baseline RNN')
     plt.plot(epochs, loss_res, label='Reservoir RNN')
 
-    if border != None:
+    if border is not None:
         plt.axvline(P.backprop_epochs, label='EA optimizing start', c='r')
 
     plt.xlabel('Epoch')
@@ -127,7 +130,7 @@ def combined_plot_exp3(epochs, loss_bl, loss_res, ea_reservoir, border=None, tit
     else:
         bias = 'No bias mutation'
 
-    plt.title(r'$\alpha = %s$, %s' %(P.perturb_rate_decay, bias))
+    plt.title(r'$\alpha = %s$, %s' % (P.perturb_rate_decay, bias))
     plt.savefig('plots/exp3/%s.png' % title, bbox_inches='tight')
     return
 
@@ -173,9 +176,9 @@ def accuracy(pred_targets_list, gold_targets_list):
         total_correct += (pred_targets == gold_targets).float().sum()
         total_amount += len(pred_targets)
 
-    accuracy = 100 * total_correct / total_amount
+    total_accuracy = 100 * total_correct / total_amount
 
-    return accuracy.item()
+    return total_accuracy.item()
 
 
 # Concatenating the results of all batches in the lists, calculating the classification error.
@@ -188,9 +191,9 @@ def class_error(pred_targets_list, gold_targets_list):
         total_error += (pred_targets != gold_targets).float().sum()
         total_amount += len(pred_targets)
 
-    class_error = (total_error / total_amount) * 100
+    total_class_error = (total_error / total_amount) * 100
 
-    return class_error.item()
+    return total_class_error.item()
 
 
 # Evaluation -> used for validation and test set.
@@ -204,27 +207,27 @@ def evaluation(val_loader, model, epoch, loss_function, test_set=False):
 
     # Initialize counters / c
     loss = 0.
-    N = 0.
+    n = 0.
 
     # Iterating over the validation set batches, acquiring tensor formatted results.
     for indx_batch, (batch, targets) in enumerate(val_loader):
         output = model.forward(batch)
         pred_targets = np.array([])
         for item in output:
-            pred_targets = np.append(pred_targets, categoryFromOutput(item))
+            pred_targets = np.append(pred_targets, category_from_output(item))
         pred_targets = torch.from_numpy(pred_targets).int()
 
         # Calculating loss
         loss_t = loss_function(output, targets.long())
         loss = loss + loss_t.item()
-        N = N + batch.shape[0]
+        n = n + batch.shape[0]
 
         # Append the batch result to a list of all results
         pred_target_total_acc.append(pred_targets)
         target_total_acc.append(targets)
 
     # Store the loss corrected by its size
-    loss = loss / N
+    loss = loss / n
 
     classification_error = class_error(pred_target_total_acc, target_total_acc)
     if not test_set:
@@ -235,28 +238,8 @@ def evaluation(val_loader, model, epoch, loss_function, test_set=False):
     return epoch, loss, classification_error
 
 
-def baseline_control(epoch, model, best_loss, loss_eval, loss_iter, max_loss_iter):
-    if epoch == 0:
-        # print('* Saving 1st epoch model *')
-        # torch.save(model, 'trained_baseline.model')
-        best_loss = loss_eval
-    else:
-        if loss_eval < best_loss:
-            # print('* Saving new best model *')
-            # torch.save(model, 'trained_baseline.model')
-            best_loss = loss_eval
-            loss_iter = 0
-        else:
-            loss_iter += 1
-
-    # If loss has not improved for an arbitrary amount of epochs:
-    # if loss_iter > max_loss_iter:
-
-    return best_loss, loss_iter
-
-
 def training(model, train_loader, val_loader, num_epochs, optimizer, loss_function, max_loss_iter, baseline=True):
-    print('Training started for %s epochs.' % (num_epochs))
+    print('Training started for %s epochs.' % num_epochs)
     epochs = []
     class_error_list = []
     loss_results = []
@@ -274,8 +257,6 @@ def training(model, train_loader, val_loader, num_epochs, optimizer, loss_functi
 
             targets = targets.long()
 
-            loss = loss_function(output, targets)
-
             # Optional print of loss per batch
             # print('Loss in batch %s is: %s' %(indx_batch, loss))
 
@@ -290,9 +271,6 @@ def training(model, train_loader, val_loader, num_epochs, optimizer, loss_functi
         epochs.append(epoch)
         class_error_list.append(classification_error)
         loss_results.append(loss_eval)
-
-        if baseline == True:
-            best_loss, loss_iter = baseline_control(epoch, model, best_loss, loss_eval, loss_iter, max_loss_iter)
 
     dict_results = {
         'model': model,

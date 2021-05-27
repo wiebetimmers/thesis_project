@@ -1,11 +1,12 @@
 import datetime  # Keep track of execution time.
-begin_time = datetime.datetime.now()
 import sys
 import Operations as Ops
 import Datasets as Data
 import Parameters as P
 import pickle
 from EA import EA
+
+begin_time = datetime.datetime.now()
 
 # Load data
 train_loader_digits, val_loader_digits, test_loader_digits = Data.get_digits_loaders(P.batch_size)
@@ -22,13 +23,13 @@ for dist in distributions:
     reservoir_model = open('models/digits_reservoir_model_RP_start.pkl', 'rb')
     reservoir_pop = pickle.load(reservoir_model)
 
-    print('\nStart training the %s random perturb model.\n' %dist)
+    print('\nStart training the %s random perturb model.\n' % dist)
 
-    # Check to set up paramters correctly
+    # Check to set up parameters correctly
     P.mutate_opt = 'random_perturbation'
     P.sample_dist = dist
 
-    # Initialize the population - same intialization for each dist
+    # Initialize the population - same initialization for each dist
     new_pop = reservoir_pop
 
     # Perform ea steps
@@ -38,11 +39,12 @@ for dist in distributions:
     # Sort population after x amount of generations, based on classification error or loss performance
     if P.select_opt == 'classification_error':
         best_pop_digits = sorted(new_pop, key=lambda k: k['class_error_results'][-1], reverse=False)
-    elif P.select_opt == 'loss':
+    else:  # Log loss
         best_pop_digits = sorted(new_pop, key=lambda k: k['loss_results'][-1], reverse=False)
 
     # Save model and results dict
-    ea_reservoir_model = open('models/exp1/digits_EA_reservoir_model_RP_%s.pkl' %dist, 'wb')
+    ea_reservoir_model = open('models/exp1/digits_EA_reservoir_model_RP_%s_s%s_pr%s.pkl' %
+                              (dist, P.sigma, P.perturb_rate_decay), 'wb')
     pickle.dump(best_pop_digits, ea_reservoir_model)
     ea_reservoir_model.close()
 
@@ -50,19 +52,23 @@ for dist in distributions:
 
 # Plot the results
 
-gaussian_file = open('models/exp1/digits_EA_reservoir_model_RP_gaussian.pkl', 'rb')
+gaussian_file = open('models/exp1/digits_EA_reservoir_model_RP_gaussian_s%s_pr%s.pkl'
+                     % (P.sigma, P.perturb_rate_decay), 'rb')
 gaussian_model = pickle.load(gaussian_file)
-uniform_file = open('models/exp1/digits_EA_reservoir_model_RP_uniform.pkl', 'rb')
+uniform_file = open('models/exp1/digits_EA_reservoir_model_RP_uniform_s%s_pr%s.pkl'
+                    % (P.sigma, P.perturb_rate_decay), 'rb')
 uniform_model = pickle.load(uniform_file)
 
-sys.stdout = open('plots/exp1/results/experiment distributions-Digits pop %s-epoch %s-mutateopt %s -select %s-decay %s-sigma %s'
-                                           %(P.population_size, P.n_epochs, P.mutate_opt, P.select_mech, P.perturb_rate_decay, P.sigma), "w")
+sys.stdout = open('plots/exp1/results/experiment distributions-Digits pop %s-epoch %s-mutateopt %s '
+                  '-select %s-decay %s-sigma %s'
+                  % (P.population_size, P.n_epochs, P.mutate_opt, P.select_mech, P.perturb_rate_decay, P.sigma), "w")
 
 Ops.print_parameters()
 
-Ops.plot_loss_exp1(gaussian_model, uniform_model, title= 'Digits pop %s - epoch %s - '
-                                           'mutateopt %s - selectopt %s - decay %s - sigma %s'
-                                           %(P.population_size, P.n_epochs, P.mutate_opt, P.select_mech, P.perturb_rate_decay, P.sigma))
+Ops.plot_loss_exp1(gaussian_model, uniform_model, title='Digits pop %s - epoch %s - '
+                                                        'mutateopt %s - selectopt %s - decay %s - sigma %s'
+                                                        % (P.population_size, P.n_epochs, P.mutate_opt, P.select_mech,
+                                                            P.perturb_rate_decay, P.sigma))
 
 # Add additional printing of lowest loss value we got
 print('Final score Digits on test set- gaussian')
@@ -77,6 +83,6 @@ test_result_digits1 = Ops.evaluation(test_loader_digits, uniform_model[0]['model
 # Print execution time:
 exc_time = datetime.datetime.now() - begin_time
 
-print('\nExecution time was: (hours:minute:seconds:microseconds) %s \n' %exc_time)
+print('\nExecution time was: (hours:minute:seconds:microseconds) %s \n' % exc_time)
 
 sys.stdout.close()
