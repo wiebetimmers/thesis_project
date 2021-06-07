@@ -16,15 +16,20 @@ def category_from_output(output):
     return LABELS[category_i]
 
 
-def get_stats(pop):
+def get_stats(pop, initial=False):
     min_list = []
     max_list = []
     mean_list = []
     std_list = []
-    for i in range(P.n_epochs):
+    if not initial:
+        epochs = P.n_epochs
+    else:
+        epochs = P.backprop_epochs
+
+    for i in range(epochs):
         epoch_list = []
         for j in range(len(pop)):
-            epoch_list.append(pop[j]['loss_results'][i])
+            epoch_list.append(pop[j]['class_error_results'][i])
         min_list.append(min(epoch_list))
         max_list.append(max(epoch_list))
         mean_list.append(st.mean(epoch_list))
@@ -110,28 +115,116 @@ def plot_loss_exp2(random_pert, diff_mut, title=''):
     return
 
 
-def combined_plot_exp3(epochs, loss_bl, loss_res, ea_reservoir, border=None, title=''):
-    stats_ea = get_stats(ea_reservoir)
-    plt.plot(stats_ea['epoch'], stats_ea['mean_list'], 'b-', label='EA Reservoir RNN')
-    plt.fill_between(stats_ea['epoch'], stats_ea['min_list'],
-                     stats_ea['max_list'], color='b', alpha=0.2)
-    plt.plot(epochs, loss_bl, label='Baseline RNN')
-    plt.plot(epochs, loss_res, label='Reservoir RNN')
+def plot_loss_exp3(ea_reservoir1,
+                   ea_reservoir2,
+                   ea_reservoir3,
+                   title=''):
+    stats_ea_reservoir1 = get_stats(ea_reservoir1)
+    stats_ea_reservoir2 = get_stats(ea_reservoir2)
+    stats_ea_reservoir3 = get_stats(ea_reservoir3)
 
-    if border is not None:
-        plt.axvline(P.backprop_epochs, label='EA optimizing start', c='r')
+    plt.plot(stats_ea_reservoir1['epoch'], stats_ea_reservoir1['mean_list'], 'b-', label=r'$\psi$ = 1')
+    plt.fill_between(stats_ea_reservoir1['epoch'], stats_ea_reservoir1['min_list'],
+                     stats_ea_reservoir1['max_list'], color='b', alpha=0.2)
+
+    best_ea_reservoir1 = ea_reservoir1[0]['loss_results'][-1]
+    worst_ea_reservoir1 = ea_reservoir1[-1]['loss_results'][-1]
+    print('\nBest val loss baseline: %s' % best_ea_reservoir1)
+    print('Worst val loss baseline: %s' % worst_ea_reservoir1)
+    print('Mean baseline: %s, std: %s\n' % (stats_ea_reservoir1['mean_list'][-1],
+                                            stats_ea_reservoir1['std_list'][-1]))
+
+    plt.plot(stats_ea_reservoir2['epoch'], stats_ea_reservoir2['mean_list'], 'r-', label=r'$\psi$ = 2')
+    plt.fill_between(stats_ea_reservoir2['epoch'], stats_ea_reservoir2['min_list'],
+                     stats_ea_reservoir2['max_list'], color='r',
+                     alpha=0.2)
+
+    best_ea_reservoir2 = ea_reservoir2[0]['loss_results'][-1]
+    worst_ea_reservoir2 = ea_reservoir2[-1]['loss_results'][-1]
+    print('\nBest val loss reservoir RNN: %s' % best_ea_reservoir2)
+    print('Worst val loss reservoir RNN: %s' % worst_ea_reservoir2)
+    print('Mean Last population reservoir RNN: %s, std: %s\n\n' % (stats_ea_reservoir2['mean_list'][-1],
+                                                                   stats_ea_reservoir2['std_list'][-1]))
+
+    plt.plot(stats_ea_reservoir3['epoch'], stats_ea_reservoir3['mean_list'], 'g-', label=r'$\psi$ = 3')
+    plt.fill_between(stats_ea_reservoir3['epoch'], stats_ea_reservoir3['min_list'],
+                     stats_ea_reservoir3['max_list'], color='g',
+                     alpha=0.2)
+
+    best_ea_reservoir3 = ea_reservoir3[0]['loss_results'][-1]
+    worst_ea_reservoir3 = ea_reservoir3[-1]['loss_results'][-1]
+    print('\nBest val loss EA reservoir RNN: %s' % best_ea_reservoir3)
+    print('Worst val loss EA reservoir RNN: %s' % worst_ea_reservoir3)
+    print('Mean Last population reservoir RNN: %s, std: %s\n\n' % (stats_ea_reservoir3['mean_list'][-1],
+                                                                   stats_ea_reservoir3['std_list'][-1]))
 
     plt.xlabel('Epoch')
     plt.ylabel('NLL')
+    plt.ylim(0, 0.5)
     plt.legend(loc='upper right')
-
-    if P.mutate_bias:
-        bias = 'Bias mutation'
-    else:
-        bias = 'No bias mutation'
-
-    plt.title(r'$\alpha = %s$, %s' % (P.perturb_rate_decay, bias))
+    plt.title('Mutate bias = %s' % P.mutate_bias)
     plt.savefig('plots/exp3/%s.png' % title, bbox_inches='tight')
+
+    return
+
+
+def plot_loss_final(baseline, reservoir, ea_reservoir, title=''):
+    stats_baseline = get_stats(baseline)
+    stats_reservoir = get_stats(reservoir)
+    stats_ea_reservoir = get_stats(ea_reservoir)
+
+    metric = 'loss_results'
+
+    plt.plot(stats_baseline['epoch'], stats_baseline['mean_list'], 'b-', label='Baseline')
+    plt.fill_between(stats_baseline['epoch'], stats_baseline['min_list'],
+                     stats_baseline['max_list'], color='b', alpha=0.2)
+
+    best_baseline = baseline[0][metric][-1]
+    worst_baseline = baseline[-1][metric][-1]
+    print('\nBest val loss baseline: %s' % best_baseline)
+    print('Worst val loss baseline: %s' % worst_baseline)
+    print('Mean baseline: %s, std: %s\n' % (stats_baseline['mean_list'][-1], stats_baseline['std_list'][-1]))
+
+    plt.plot(stats_reservoir['epoch'], stats_reservoir['mean_list'], 'r-', label='Reservoir')
+    plt.fill_between(stats_reservoir['epoch'], stats_reservoir['min_list'],
+                     stats_reservoir['max_list'], color='r',
+                     alpha=0.2)
+
+    best_reservoir = reservoir[0][metric][-1]
+    worst_reservoir = reservoir[-1][metric][-1]
+    print('\nBest val loss reservoir RNN: %s' % best_reservoir)
+    print('Worst val loss reservoir RNN: %s' % worst_reservoir)
+    print('Mean Last population reservoir RNN: %s, std: %s\n\n' % (stats_reservoir['mean_list'][-1],
+                                                                   stats_reservoir['std_list'][-1]))
+
+    plt.plot(stats_ea_reservoir['epoch'], stats_ea_reservoir['mean_list'], 'g-', label='EA Reservoir')
+    plt.fill_between(stats_ea_reservoir['epoch'], stats_ea_reservoir['min_list'],
+                     stats_ea_reservoir['max_list'], color='g',
+                     alpha=0.2)
+
+    best_ea_reservoir = ea_reservoir[0][metric][-1]
+    worst_ea_reservoir = ea_reservoir[-1][metric][-1]
+    print('\nBest val loss EA reservoir RNN: %s' % best_ea_reservoir)
+    print('Worst val loss EA reservoir RNN: %s' % worst_ea_reservoir)
+    print('Mean Last population reservoir RNN: %s, std: %s\n\n' % (stats_ea_reservoir['mean_list'][-1],
+                                                                   stats_ea_reservoir['std_list'][-1]))
+
+    plt.xlabel('Epoch')
+    plt.ylabel('NLL')
+    plt.ylim(0, 0.5)
+    plt.legend(loc='upper right')
+    plt.savefig('plots/exp3/%s.png' % title, bbox_inches='tight')
+
+    return
+
+
+def print_stat_initial(initial_model):
+    stats = get_stats(initial_model, initial=True)
+    best_initial = initial_model[0]['loss_results'][-1]
+    worst_initial = initial_model[-1]['loss_results'][-1]
+    print('\nBest val loss initial model: %s' % best_initial)
+    print('Worst val loss initial model: %s' % worst_initial)
+    print('Mean initial model: %s, std: %s\n\n' % (stats['mean_list'][-1], stats['std_list'][-1]))
     return
 
 
@@ -150,6 +243,7 @@ def print_parameters():
           'generations: %s,\n'
           'mutate opt: %s,\n'
           'perturb rate: %s,\n'
+          'perturb rate decay: %s, \n'
           'mutate_bias: %s\n'
           'sample_dist: %s\n'
           'mu: %s\n'
@@ -158,9 +252,10 @@ def print_parameters():
           'select mech: %s\n'
           'k_best: %s\n'
           'offspring ratio: %s\n'
-          'n epochs: %s\n' % (P.population_size, P.generations, P.mutate_opt, P.perturb_rate,
-                              P.mutate_bias, P.sample_dist, P.mu, P.sigma, P.select_opt, P.select_mech, P.k_best,
-                              P.offspring_ratio, P.n_epochs))
+          'n epochs: %s\n'
+          % (P.population_size, P.generations, P.mutate_opt, P.perturb_rate, P.perturb_rate_decay,
+             P.mutate_bias, P.sample_dist, P.mu, P.sigma, P.select_opt, P.select_mech, P.k_best,
+             P.offspring_ratio, P.n_epochs))
 
     print('# --------------------------------------------------------------------------\n')
     return
@@ -238,7 +333,8 @@ def evaluation(val_loader, model, epoch, loss_function, test_set=False):
     return epoch, loss, classification_error
 
 
-def training(model, train_loader, val_loader, num_epochs, optimizer, loss_function, max_loss_iter, baseline=True):
+def training(model, train_loader, val_loader, num_epochs, optimizer, loss_function, max_loss_iter, baseline=True,
+             exp3=False, initial_model=None):
     print('Training started for %s epochs.' % num_epochs)
     epochs = []
     class_error_list = []
@@ -248,7 +344,17 @@ def training(model, train_loader, val_loader, num_epochs, optimizer, loss_functi
 
     torch.autograd.set_detect_anomaly(True)
 
-    for epoch in range(num_epochs):
+    # This rule is made so we can continue learning for experiment 3 - reservoir network population
+    # Default is off, which means we start at epoch 0. Else we start at epoch 4
+    if not exp3:
+        x = range(num_epochs)
+    else:
+        x = range(P.backprop_epochs-1, num_epochs)
+        epochs = initial_model['epoch']
+        class_error_list = initial_model['class_error_results']
+        loss_results = initial_model['loss_results']
+
+    for epoch in x:
 
         # Training
         model.train()

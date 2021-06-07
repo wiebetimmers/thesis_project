@@ -21,10 +21,13 @@ select mechanisms = [merge_all, keep_k_best_parents, keep_only_best_offspring]
 Compare the best performing EA to the baseline RNN and reservoir RNN: Experiment 3
 Trying out among different pop sizes + additional interesting customized parameters
 
-pop_size = [10, 20, 50]
-mutate_bias_weights = [True, False]
-off_spring_ratio = 1 , 2 , 3 ?
+pop_size = [25]
+epochs = [245]
 
+off_spring_ratio = 1 , 2 , 3
+mutate_bias_weights = [True]
+
+best model - run it on MNIST dataset once
 --------------------------------------------------------------------------------------------------------
 
 For each experiment:

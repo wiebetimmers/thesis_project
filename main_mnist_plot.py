@@ -29,7 +29,7 @@ Ops.combined_plot_result(
             label_bl = 'Baseline RNN',
             label_res = 'Reservoir RNN',
             label_evo = 'EA Reservoir RNN',
-            title = 'MNIST pop %s - epoch %s - mutateopt %s - selectopt %s' %(P.population_size, P.n_epochs, P.mutate_opt, P.select_mech))
+            title='MNIST pop %s - epoch %s - mutateopt %s - selectopt %s' %(P.population_size, P.n_epochs, P.mutate_opt, P.select_mech))
 
 Ops.best_pop_plot(ea_reservoir_model,
               ea_reservoir_model[0],

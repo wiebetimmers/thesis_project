@@ -12,10 +12,12 @@ begin_time = datetime.datetime.now()
 train_loader_digits, val_loader_digits, test_loader_digits = Data.get_digits_loaders(P.batch_size)
 
 # --------------------------------------------------------------------------------------------------------------
+# Running an experiment for the mutations!
+# --------------------------------------------------------------------------------------------------------------
+
 
 ea = EA(P.population_size, val_loader_digits, P.loss_function, P.input_size_digits, P.reservoir_size, P.n_labels)
 
-# Running an experiment for the mutations!
 mutations = ['random_perturbation', 'diff_mutation']
 
 for mutation in mutations:
@@ -48,8 +50,8 @@ for mutation in mutations:
     ea_reservoir_model.close()
 
 # ----------------------------------------------------------------------------------------------------------
-
 # Plot the results
+# ----------------------------------------------------------------------------------------------------------
 
 random_pert_file = open('models/exp2/digits_EA_reservoir_model_random_perturbation_pr%s_sm%s.pkl'
                         % (P.perturb_rate_decay, P.select_mech), 'rb')
