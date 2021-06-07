@@ -1,0 +1,106 @@
+Network parameters:
+reservoir size: 128, 
+n_hidden: 128, 
+learning rate: 0.0001, 
+momentum sgd: 0.9, 
+backprop epochs: 5, 
+T: 5, 
+loss_function: NLLLoss() 
+
+EA parameters: 
+ pop size: 25,
+generations: 245,
+mutate opt: random_perturbation,
+perturb rate: 0.5,
+perturb rate decay: 0.05, 
+mutate_bias: True
+sample_dist: gaussian
+mu: 0
+sigma: 0.2
+select opt: loss
+select mech: merge_all
+k_best: 5
+offspring ratio: 2
+n epochs: 250
+
+# --------------------------------------------------------------------------
+
+Epoch: Final score Digits on test set- baseline - Loss of: 0.5477020354478951 - Classification Error of: 9.395973205566406
+Epoch: Final score Digits on test set - only output train - Loss of: 0.3691176093398058 - Classification Error of: 10.067113876342773
+Epoch: Final score Digits on test set- with evolution - Loss of: 0.5117465014959075 - Classification Error of: 14.765100479125977
+
+Best val loss initial model: 0.18281175340924943
+Worst val loss initial model: 0.341238055910383
+Mean initial model: 0.23502012661525182, std: 0.03006989880775347
+
+
+Epoch: Final score Digits on test set- the intial 5 epoch model - Loss of: 0.39877156869943775 - Classification Error of: 11.633109092712402
+
+Best val loss baseline: 0.12391425234930856
+Worst val loss baseline: 0.15727759190968105
+Mean baseline: 0.13988052258150918, std: 0.008785850057656655
+
+
+Best val loss reservoir RNN: 0.1267022568838937
+Worst val loss reservoir RNN: 0.2637002386365618
+Mean Last population reservoir RNN: 0.1807797317300524, std: 0.03604527989235693
+
+
+
+Best val loss EA reservoir RNN: 0.06813046319144113
+Worst val loss EA reservoir RNN: 0.0731162657056536
+    Mean Last population reservoir RNN: 0.07243012574059622, std: 0.0012722085216189747
+
+
+-----------------------------------------------------------------------
+      Layer (type)         Input Shape         Param #     Tr. Param #
+=======================================================================
+          Linear-1            [1, 128]          16,512          16,512
+            Tanh-2            [1, 128]               0               0
+          Linear-3            [1, 192]          24,704          24,704
+            ReLU-4            [1, 128]               0               0
+          Linear-5            [1, 192]          24,704          24,704
+            ReLU-6            [1, 128]               0               0
+          Linear-7            [1, 192]          24,704          24,704
+            ReLU-8            [1, 128]               0               0
+          Linear-9            [1, 192]          24,704          24,704
+           ReLU-10            [1, 128]               0               0
+         Linear-11            [1, 192]          24,704          24,704
+           ReLU-12            [1, 128]               0               0
+         Linear-13            [1, 192]           1,930           1,930
+     LogSoftmax-14             [1, 10]               0               0
+=======================================================================
+Total params: 141,962
+Trainable params: 141,962
+Non-trainable params: 0
+-----------------------------------------------------------------------
+-----------------------------------------------------------------------
+      Layer (type)         Input Shape         Param #     Tr. Param #
+=======================================================================
+          Linear-1             [1, 64]           8,320               0
+            Tanh-2            [1, 128]               0               0
+          Linear-3            [1, 128]          16,512               0
+          Linear-4             [1, 64]           8,320               0
+            ReLU-5            [1, 128]               0               0
+          Linear-6            [1, 128]          16,512               0
+          Linear-7             [1, 64]           8,320               0
+            ReLU-8            [1, 128]               0               0
+          Linear-9            [1, 128]          16,512               0
+         Linear-10             [1, 64]           8,320               0
+           ReLU-11            [1, 128]               0               0
+         Linear-12            [1, 128]          16,512               0
+         Linear-13             [1, 64]           8,320               0
+           ReLU-14            [1, 128]               0               0
+         Linear-15            [1, 128]          16,512               0
+         Linear-16             [1, 64]           8,320               0
+           ReLU-17            [1, 128]               0               0
+         Linear-18            [1, 128]           1,290           1,290
+     LogSoftmax-19             [1, 10]               0               0
+=======================================================================
+Total params: 133,770
+Trainable params: 1,290
+Non-trainable params: 132,480
+-----------------------------------------------------------------------
+
+Execution time was: (hours:minute:seconds:microseconds) 0:00:01.417764 
+

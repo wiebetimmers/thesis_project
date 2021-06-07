@@ -1,0 +1,41 @@
+Network parameters:
+reservoir size: 128, 
+n_hidden: 128, 
+learning rate: 0.0001, 
+momentum sgd: 0.9, 
+backprop epochs: 5, 
+T: 5, 
+loss_function: NLLLoss() 
+
+EA parameters: 
+ pop size: 25,
+generations: 245,
+mutate opt: diff_mutation,
+perturb rate: 0.5,
+mutate_bias: False
+sample_dist: uniform
+mu: 0
+sigma: 0.2
+select opt: loss
+select mech: merge_all
+k_best: 5
+offspring ratio: 1
+n epochs: 250
+
+# --------------------------------------------------------------------------
+
+Best val loss random perturbation: 0.05501734665461949
+Worst val loss random perturbation: 0.0582804342678615
+Mean last population random perturbation: 0.057193251051221576, std: 0.0007797274422939959
+Best val loss diff mutation: 0.12418109553200858
+Worst val loss diff mutation: 0.12418109553200858
+Mean Last population diff mutation: 0.12418109553200858, std: 0.0
+
+
+Final score Digits on test set- random perturbation
+Loss of: 0.563282039608198 - Classification Error of: 12.527963638305664
+Final score Digits on test set- diff mutation
+Loss of: 0.4741196067007863 - Classification Error of: 12.527963638305664
+
+Execution time was: (hours:minute:seconds:microseconds) 0:19:37.172686 
+

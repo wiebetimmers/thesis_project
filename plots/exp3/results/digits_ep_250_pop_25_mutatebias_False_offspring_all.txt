@@ -1,0 +1,47 @@
+Network parameters:
+reservoir size: 128, 
+n_hidden: 128, 
+learning rate: 0.0001, 
+momentum sgd: 0.9, 
+backprop epochs: 5, 
+T: 5, 
+loss_function: NLLLoss() 
+
+EA parameters: 
+ pop size: 25,
+generations: 245,
+mutate opt: random_perturbation,
+perturb rate: 0.5,
+perturb rate decay: 0.05, 
+mutate_bias: False
+sample_dist: gaussian
+mu: 0
+sigma: 0.2
+select opt: loss
+select mech: merge_all
+k_best: 5
+offspring ratio: 3
+n epochs: 250
+
+# --------------------------------------------------------------------------
+
+Epoch: Final score Digits on test set- with evolution - offspring 1 - Loss of: 0.47176327268015883 - Classification Error of: 12.080536842346191
+Epoch: Final score Digits on test set- with evolution - offspring 2 - Loss of: 0.4863591247490322 - Classification Error of: 14.765100479125977
+Epoch: Final score Digits on test set- with evolution - offspring 3 - Loss of: 0.4122328576892281 - Classification Error of: 12.080536842346191
+
+Best val loss baseline: 0.06733385154179164
+Worst val loss baseline: 0.07176109450204032
+Mean baseline: 0.07071657796587263, std: 0.001328860348163885
+
+
+Best val loss reservoir RNN: 0.05513263157435826
+Worst val loss reservoir RNN: 0.05663669279643468
+Mean Last population reservoir RNN: 0.05657653034755162, std: 0.00030081224441528415
+
+
+
+Best val loss EA reservoir RNN: 0.05922625950404576
+Worst val loss EA reservoir RNN: 0.05922625950404576
+Mean Last population reservoir RNN: 0.05922625950404576, std: 0.0
+
+
