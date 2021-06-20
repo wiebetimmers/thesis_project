@@ -9,5 +9,5 @@
 - main_mnist.. .py contains some draft code to run on the mnist dataset
 - final_results_plot_digits was used to plot the results for the final experiment of section 4 in the thesis paper. 
 
-The directory models contains all the .pkl stored models
-The directory results contains both .txt as .png files for the graph and results. 
+The directory 'models' contains all the .pkl stored models
+The directory 'plots' contains both .txt as .png files with graphs and results. 
