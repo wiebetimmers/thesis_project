@@ -21,7 +21,7 @@ max_loss_iter = 10  # not  used yet
 
 # EA parameters
 population_size = 25
-generations = 245     # epochs without backpropagation
+generations = 245    # epochs without backpropagation
 mutate_opt = 'random_perturbation'  # Options: 'random_perturbation' , 'diff_mutation'
 perturb_rate = 0.5  # initial rate, Fraction of sample mutation added to the population
 perturb_rate_decay = 0.05

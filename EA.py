@@ -255,8 +255,9 @@ class EA(object):
 
             if P.mutate_bias:
                 reservoir['model'].layer1.bias = random.choice(W_in_bias)
-                reservoir['model'].layer3.bias = random.choice(U_bias)
-                reservoir['model'].layer2.bias = random.choice(W_r_bias)
+                number = random.randint(0, len(U_bias)-1)
+                reservoir['model'].layer3.bias = U_bias[number] # U and W_r form one bias mutation weight in the paper
+                reservoir['model'].layer2.bias = W_r_bias[number] # so we draw from the same parent.
                 reservoir['model'].layer4.bias = random.choice(W_out_bias)
 
         return crossed_pop

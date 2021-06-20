@@ -19,6 +19,6 @@ for i in range(P.population_size):
                                       optimizer_evo_digits, P.loss_function, P.max_loss_iter)
     reservoir_set_digits.append(trained_evo_digits)
 
-reservoir_model = open('models/digits_reservoir_model_RP_start.pkl', 'wb')
+reservoir_model = open('models/exp3/digits_initial_model_start_pop_%s.pkl' %P.population_size, 'wb')
 pickle.dump(reservoir_set_digits, reservoir_model)
 reservoir_model.close()

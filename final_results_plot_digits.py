@@ -63,9 +63,9 @@ Ops.plot_loss_final(baseline_model, reservoir_model_no_evo, ea_reservoir_model,
                     title='offspring_ratio_%s_mutatebias_%s' % (P.offspring_ratio, P.mutate_bias))
 
 # Baseline RNN model
-print(summary(baseline_model[0]['model'], torch.zeros(1, 64), show_input=True, show_hierarchical=False))
+print(summary(baseline_model[0]['model'], torch.zeros(1, 64), show_input=False, show_hierarchical=False))
 # Reservoir RNN model
-print(summary(reservoir_model_no_evo[0]['model'], torch.zeros(1, 64), show_input=True, show_hierarchical=False))
+print(summary(reservoir_model_no_evo[0]['model'], torch.zeros(1, 64), show_input=False, show_hierarchical=False))
 
 # Print execution time:
 exc_time = datetime.datetime.now() - begin_time
